@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "74885674202",
+    "project_id": "liberink-1",
+    "storage_bucket": "liberink-1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:74885674202:android:69a838b4aa0577cee0a1e3",
+        "android_client_info": {
+          "package_name": "com.zaitsev.liberink"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlSA9M1foFiYmefRsfBxGvo32YO3pYSSo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

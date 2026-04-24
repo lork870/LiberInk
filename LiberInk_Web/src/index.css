@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+@theme {
+  --color-liber-cream: #F6F3E9;
+  --color-liber-orange: #F5A623;
+  --font-serif: "Cormorant Garamond", serif;
+  --font-sans: "Manrope", sans-serif;
+}
