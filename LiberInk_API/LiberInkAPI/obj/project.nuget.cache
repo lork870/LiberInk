@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "LbBaqT39BZo=",
+  "dgSpecHash": "XGZxY7cOWtU=",
   "success": true,
-  "projectFilePath": "D:\\University\\LiberInkAPI\\LiberInkAPI\\LiberInkAPI.csproj",
+  "projectFilePath": "D:\\University\\LiberInk\\LiberInk_API\\LiberInkAPI\\LiberInkAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\nazar\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\nazar\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\6.0.0\\microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",

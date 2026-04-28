@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LiberInkAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1c485090c1eec4bbec8c485729b2abc33f537f4a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7a2db10d9864fe2ce3be016bebdb53248eda028d")]
 [assembly: System.Reflection.AssemblyProductAttribute("LiberInkAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LiberInkAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
