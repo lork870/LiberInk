@@ -6,3 +6,26 @@
   --font-serif: "Cormorant Garamond", serif;
   --font-sans: "Manrope", sans-serif;
 }
+
+@layer base {
+  .ProseMirror:focus {
+    outline: none !important;
+  }
+
+  .ProseMirror {
+    /* Прибираємо будь-які обмеження висоти */
+    min-height: 100vh !important; 
+    background: transparent !important;
+  }
+
+  .ProseMirror p {
+    margin: 0;
+    /* Відступ між абзацами */
+    padding-bottom: 1.2em; 
+    line-height: 1.625;
+    font-size: 18px;
+    color: #2c3e50;
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }

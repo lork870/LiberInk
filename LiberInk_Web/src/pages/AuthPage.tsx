@@ -8,7 +8,6 @@ import {
 } from 'firebase/auth';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-// Імпорт іконок та текстур
 import { GoogleIcon } from '../components/GoogleIcon'; 
 import my_ic_Logo from '../assets/ic_logo.png';
 import bgTexture from '../assets/paper_texture.jpg'; 
@@ -115,29 +114,24 @@ const AuthPage = () => {
 
       {/* Main Card Container */}
       <div className="w-full max-w-[380px] flex flex-col items-center">
-        {/* Прибрали style={{...}} звідси, щоб фон не масштабувався! */}
         <div 
           className={`w-full rounded-[32px] shadow-[0_15px_40px_rgba(74,4,4,0.12)] px-8 py-8 border border-[#4A0404]/5 overflow-hidden relative transition-all duration-500 ease-in-out ${isLogin ? 'max-h-[500px]' : 'max-h-[750px]'}`}
         >
           
-          {/* 1. ФІКСОВАНИЙ ФОН: h-[800px] гарантує, що він не дихає. Він просто ховається під overflow-hidden */}
           <div 
             className="absolute top-0 left-0 w-full h-[800px] pointer-events-none"
             style={{ backgroundImage: `url(${bgTexture})`, backgroundSize: 'cover', backgroundPosition: 'top center' }}
           ></div>
 
-          {/* 2. НАПІВПРОЗОРИЙ БІЛИЙ ФОН: bg-white/70 (можеш змінити на 80, якщо треба ще біліше) */}
           <div className="absolute inset-0 bg-white/70 pointer-events-none"></div>
 
           <div className="relative z-10 text-center">
             <form onSubmit={handleSubmit} className="flex flex-col text-left font-sans">
               
-              {/* Поле: Name */}
               <div 
                 className={`transition-all duration-500 ease-in-out overflow-hidden ${isLogin ? 'max-h-0 opacity-0 mb-0 pt-0' : 'max-h-[100px] opacity-100 mb-4 pt-3'}`}
               >
                 <div className="relative">
-                  {/* Лейблам теж поставив bg-white/70, щоб зливалося з карткою */}
                   <label 
                     className="absolute top-0 left-4 -translate-y-1/2 z-20 px-1.5 text-[12px] font-medium text-[#4A0404]/80 bg-white/70 rounded-sm"
                     style={{ backgroundImage: `url(${bgTexture})`, backgroundSize: '800%', backgroundPosition: 'center' }}

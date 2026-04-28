@@ -4,6 +4,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
+import { PageBreak } from './PageBreak';
 
 // Імпорти іконок
 import {
@@ -11,7 +12,7 @@ import {
   StrikethroughS, FormatAlignLeft, FormatAlignCenter,
   FormatAlignRight, FormatAlignJustify, Add,
   CheckCircleOutlined, FolderOpen, KeyboardArrowDown,
-  InsertDriveFile
+  InsertDriveFile, HorizontalRule
 } from '@mui/icons-material';
 
 interface Book {
@@ -23,42 +24,75 @@ interface Book {
   lastEdited: string;
 }
 
+// 1. КОНФІГУРАЦІЯ ФОРМАТІВ СТОРІНОК (Розміри в пікселях)
+const PAGE_FORMATS = {
+  A4: { width: 794, height: 1123, name: 'A4' },
+  A5: { width: 559, height: 794, name: 'A5' },
+  Letter: { width: 816, height: 1056, name: 'Letter' },
+  Pocket: { width: 416, height: 605, name: 'Pocket (Кишеньковий)' },
+};
+
+type FormatKey = keyof typeof PAGE_FORMATS;
+
 const EditorPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [book, setBook] = useState<Book | null>(null);
   const [zoom, setZoom] = useState(100);
   const [wordCount, setWordCount] = useState(0);
-  const [pageCount, setPageCount] = useState(1);
+  const [pageCount, setPageCount] = useState(1); 
+  
+  // Стан для поточного формату
+  const [currentFormat, setCurrentFormat] = useState<FormatKey>('A4');
+  // useRef потрібен, щоб onUpdate завжди бачив актуальний формат без перерендеру редактора
+  const currentFormatRef = useRef<FormatKey>(currentFormat);
+  
   const editorContainerRef = useRef<HTMLDivElement>(null);
 
-  // 1. Налаштування Tiptap
+  // Оновлюємо ref при зміні формату
+  useEffect(() => {
+    currentFormatRef.current = currentFormat;
+  }, [currentFormat]);
+
+  // 2. Налаштування Tiptap
   const editor = useEditor({
     extensions: [
       StarterKit,
       Underline,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      PageBreak, 
     ],
     editorProps: {
       attributes: {
-        // Прибираємо фіксовану висоту з самого редактора, 
-        // він буде рости всередині контейнера сторінок
-        class: 'outline-none font-serif leading-[2] text-[18px] text-[#333] text-justify min-h-[1000px]',
+        // Прибрали жорстку висоту (min-h-[943px]), тепер контейнер диктує розмір
+        class: 'outline-none font-serif leading-[2] text-[18px] text-[#333] text-justify h-full', 
       },
     },
     onUpdate: ({ editor }) => {
       const text = editor.getText();
       setWordCount(text.trim() ? text.trim().split(/\s+/).length : 0);
+
+      // Вираховуємо кількість сторінок на основі АКТУАЛЬНОГО формату
+      const pageHeight = PAGE_FORMATS[currentFormatRef.current].height;
+      const contentHeight = editor.view.dom.scrollHeight + 180; // 180 - це padding (90 зверху + 90 знизу)
+      const calculatedPages = Math.max(1, Math.ceil(contentHeight / pageHeight));
       
-      // Розрахунок сторінок: ми вимірюємо висоту DOM-елемента редактора
-      // і ділимо на висоту віртуальної сторінки (приблизно 1056px)
-      const contentHeight = editor.view.dom.scrollHeight;
-      const calculatedPages = Math.max(1, Math.ceil(contentHeight / 1056));
-      setPageCount(calculatedPages);
+      if (calculatedPages !== pageCount) {
+        setPageCount(calculatedPages);
+      }
     },
   });
 
-  // 2. Завантаження даних
+  // Перерахунок сторінок при зміні формату
+  useEffect(() => {
+    if (editor) {
+      const pageHeight = PAGE_FORMATS[currentFormat].height;
+      const contentHeight = editor.view.dom.scrollHeight + 180;
+      setPageCount(Math.max(1, Math.ceil(contentHeight / pageHeight)));
+    }
+  }, [currentFormat, editor]);
+
+  // 3. Завантаження даних
   useEffect(() => {
     const fetchBook = async () => {
       try {
@@ -76,7 +110,7 @@ const EditorPage = () => {
     fetchBook();
   }, [id, editor, navigate]);
 
-  // 3. Професійний Zoom (Pinch + Mouse Wheel)
+  // 4. Професійний Zoom (Pinch + Mouse Wheel)
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (e.ctrlKey || e.metaKey) {
@@ -88,29 +122,6 @@ const EditorPage = () => {
     window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);
   }, []);
-
-  // 4. Логіка збереження
-  useEffect(() => {
-    const saveBtn = document.getElementById('global-save-btn');
-    const handleSave = async () => {
-      if (!book || !editor) return;
-      try {
-        await fetch(`http://localhost:5241/api/Books/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            ...book, 
-            description: editor.getHTML(), 
-            lastEdited: new Date().toISOString() 
-          })
-        });
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    saveBtn?.addEventListener('click', handleSave);
-    return () => saveBtn?.removeEventListener('click', handleSave);
-  }, [book, editor, id]);
 
   if (!editor || !book) return null;
 
@@ -142,7 +153,7 @@ const EditorPage = () => {
           className="flex-1 overflow-y-auto flex flex-col items-center scrollbar-hide bg-[#EAD9C6]/20 relative pt-4"
         >
           {/* TOOLBAR */}
-          <div className="sticky top-4 bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl border border-[#E8E2D2]/50 flex items-center gap-1 mb-10 z-50">
+          <div className="sticky top-4 bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl border border-[#E8E2D2]/50 flex items-center gap-1 mb-10 z-50 transition-all">
             <ToolbarButton 
               active={editor.isActive('bold')} 
               onClick={() => editor.chain().focus().toggleBold().run()} 
@@ -184,40 +195,91 @@ const EditorPage = () => {
               onClick={() => editor.chain().focus().setTextAlign('justify').run()} 
               IconComponent={FormatAlignJustify} 
             />
+            
+            <div className="w-px h-6 bg-gray-200 mx-2" />
+            
+            {/* КНОПКА РОЗРИВУ СТОРІНКИ */}
+            <button 
+              onMouseDown={(e) => { 
+                e.preventDefault(); 
+                // @ts-ignore
+                editor.chain().focus().setPageBreak().run(); 
+              }}
+              className="p-2 rounded-lg transition-all text-gray-500 hover:bg-[#F3EAD3] hover:text-[#4A0E0E]"
+              title="Додати розрив сторінки (Ctrl+Enter)"
+            >
+              <HorizontalRule sx={{ fontSize: 20 }} />
+            </button>
+
+            <div className="w-px h-6 bg-gray-200 mx-2" />
+
+            {/* ПЕРЕМИКАЧ ФОРМАТІВ СТОРІНОК */}
+            <select 
+              value={currentFormat}
+              onChange={(e) => setCurrentFormat(e.target.value as FormatKey)}
+              title="Формат аркуша"
+              className="bg-transparent text-[12px] font-bold text-[#4A0E0E] outline-none cursor-pointer hover:bg-[#F3EAD3] px-2 py-2 rounded-lg transition-all"
+            >
+              {Object.keys(PAGE_FORMATS).map((key) => (
+                <option key={key} value={key} className="font-sans text-gray-800">
+                  {PAGE_FORMATS[key as FormatKey].name}
+                </option>
+              ))}
+            </select>
+
           </div>
 
-          {/* ВЕРТИКАЛЬНІ СТОРІНКИ */}
+          {/* ВЕРТИКАЛЬНІ СТОРІНКИ (Динамічний розмір) */}
           <div 
-            className="transition-transform duration-75 origin-top pb-40 flex flex-col items-center gap-10"
+            className="transition-transform duration-100 origin-top pb-40 flex flex-col items-center gap-10"
             style={{ transform: `scale(${zoom / 100})` }}
           >
-            {/* ПРОФЕСІЙНИЙ ПІДХІД: 
-                Ми рендеримо один EditorContent, але накладаємо поверх нього 
-                контейнери, які візуально розбивають його на А4.
-            */}
-            <div className="relative shadow-2xl border border-gray-200 bg-white"
+            <div className="relative shadow-2xl border border-gray-200 bg-white flex transition-all duration-300 ease-in-out"
                  style={{ 
-                   width: '816px', 
-                   minHeight: '1123px',
+                   width: `${PAGE_FORMATS[currentFormat].width}px`, 
+                   minHeight: `${PAGE_FORMATS[currentFormat].height}px` 
                  }}>
               
-              {/* Візуальні розділювачі сторінок */}
-              {Array.from({ length: Math.max(0, pageCount - 1) }).map((_, i) => (
-                <div 
-                  key={i}
-                  className="absolute left-0 right-0 z-20 pointer-events-none flex flex-col items-center"
-                  style={{ top: `${(i + 1) * 1123}px`, transform: 'translateY(-20px)' }}
-                >
-                  <div className="w-full h-10 bg-[#F5F0E5] border-y border-[#E8E2D2] flex items-center justify-center">
-                    <span className="text-[9px] font-bold text-gray-400 tracking-widest uppercase">
-                      Page Break • {i + 2}
+              {/* ЛІВА ЛІНІЙКА */}
+              <div className="w-16 shrink-0 border-r border-[#E8E2D2] bg-[#fdfcf9] relative overflow-hidden pointer-events-none">
+                {Array.from({ length: pageCount }).map((_, i) => (
+                  <div 
+                    key={i} 
+                    className="absolute w-full flex flex-col items-center transition-all duration-300 ease-in-out"
+                    style={{ top: `${i * PAGE_FORMATS[currentFormat].height}px` }} 
+                  >
+                    <span className="mt-4 text-[10px] font-bold text-gray-400">
+                      Стор. {i + 1}
                     </span>
+                    {i > 0 && (
+                      <div className="absolute top-0 w-full border-t-2 border-dashed border-gray-300"></div>
+                    )}
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
 
-              <div className="relative z-10" style={{ padding: '90px 100px' }}>
-                <EditorContent editor={editor} />
+              <div 
+                className="flex-1" 
+                style={{ 
+                  padding: currentFormat === 'Pocket' ? '40px 30px' : '90px 54px', 
+                  width: '100%', 
+                  maxWidth: `${PAGE_FORMATS[currentFormat].width}px`,
+                  boxSizing: 'border-box',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                <EditorContent 
+                  editor={editor} 
+                  className="h-full w-full" 
+                  style={{
+                    boxSizing: 'border-box',
+                    // Ці властивості змусять текст (і код) переноситися, не ламаючи правий відступ
+                    wordBreak: 'break-word', 
+                    overflowWrap: 'anywhere',
+                    textAlign: 'justify', // Можна залишити, якщо слова будуть переноситись
+                  }}
+                />
               </div>
             </div>
           </div>
