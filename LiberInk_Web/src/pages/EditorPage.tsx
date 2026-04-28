@@ -2,11 +2,10 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { FontSize } from './FontSize'; // Твоє кастомне розширення
-import { PageBreak } from './PageBreak';
+import { PageBreak } from './PageBreak.tsx';
 import FontFamily from '@tiptap/extension-font-family';
 
 // Імпорти іконок Material UI
@@ -110,7 +109,6 @@ const EditorPage = () => {
         bulletList: { keepMarks: true, keepAttributes: false },
         orderedList: { keepMarks: true, keepAttributes: false },
       }),
-      Underline,
       TextStyle,
       FontSize,
       FontFamily,

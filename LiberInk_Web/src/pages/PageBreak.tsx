@@ -1,18 +1,9 @@
 import { Node, mergeAttributes } from '@tiptap/core';
 
-declare module '@tiptap/core' {
-  interface Commands<ReturnType> {
-    pageBreak: {
-      setPageBreak: () => ReturnType;
-    };
-  }
-}
-
 export const PageBreak = Node.create({
   name: 'pageBreak',
   group: 'block',
-  selectable: true,
-  draggable: true,
+  atom: true,
 
   parseHTML() {
     return [{ tag: 'div[data-type="page-break"]' }];
@@ -22,27 +13,18 @@ export const PageBreak = Node.create({
     return [
       'div', 
       mergeAttributes(HTMLAttributes, { 
-        'data-type': 'page-break', 
-        class: 'custom-page-break' 
-      }), 
-      ['span', { contenteditable: 'false' }, 'PAGE BREAK']
+        'data-type': 'page-break',
+        class: 'page-break',
+        style: 'height: 40px; margin: 20px 0; border-top: 2px dashed #E8E2D2; pointer-events: none;'
+      })
     ];
   },
 
   addCommands() {
     return {
-      setPageBreak: () => ({ chain }) => {
-        return chain()
-          .insertContent({ type: this.name })
-          .focus()
-          .run();
+      setPageBreak: () => ({ commands }: { commands: any }) => {
+        return commands.insertContent({ type: this.name });
       },
-    };
-  },
-
-  addKeyboardShortcuts() {
-    return {
-      'Mod-Enter': () => this.editor.commands.setPageBreak(),
-    };
+    } as any;
   },
 });
