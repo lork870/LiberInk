@@ -90,6 +90,142 @@
   },
   {
     "ContainingType": "LiberInkAPI.Controllers.BooksController",
+    "Method": "PostElement",
+    "RelativePath": "api/Books/elements",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "element",
+        "Type": "LiberInkAPI.Models.BookElement",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "LiberInkAPI.Models.BookElement",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "LiberInkAPI.Controllers.BooksController",
+    "Method": "GetElement",
+    "RelativePath": "api/Books/elements/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "LiberInkAPI.Models.BookElement",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "LiberInkAPI.Controllers.BooksController",
+    "Method": "PutElement",
+    "RelativePath": "api/Books/elements/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "element",
+        "Type": "LiberInkAPI.Models.BookElement",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "LiberInkAPI.Controllers.BooksController",
+    "Method": "DeleteElement",
+    "RelativePath": "api/Books/elements/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "LiberInkAPI.Controllers.BooksController",
+    "Method": "MoveElement",
+    "RelativePath": "api/Books/elements/{id}/move",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "LiberInkAPI.Controllers.MoveElementRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "LiberInkAPI.Controllers.BooksController",
+    "Method": "GetBookStructure",
+    "RelativePath": "api/Books/structure/{bookId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[LiberInkAPI.Models.BookElementDto, LiberInkAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "LiberInkAPI.Controllers.BooksController",
     "Method": "GetUserBooks",
     "RelativePath": "api/Books/user/{userId}",
     "HttpMethod": "GET",

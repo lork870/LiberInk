@@ -8,5 +8,7 @@
         public string UserId { get; set; }
         public string AuthorPseudonym { get; set; }
         public DateTime LastEdited { get; set; } = DateTime.Now;
+
+        public List<BookElement> Elements { get; set; } = new();
     }
 }

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { auth } from '../../firebase';
@@ -56,6 +55,7 @@ const SidebarLayout = () => {
             <div className="flex items-center gap-6">
               <button 
                 id="global-save-btn"
+                onClick={() => window.dispatchEvent(new Event('trigger-save'))}
                 className="px-8 py-1.5 bg-[#F9F5EB] border border-[#4A0E0E] text-[#4A0E0E] rounded-full font-bold text-sm hover:bg-[#4A0E0E] hover:text-white transition-all shadow-sm"
               >
                 Save
