@@ -1,22 +1,27 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
+import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
+
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyle } from '@tiptap/extension-text-style';
-import { FontSize } from './FontSize'; 
-import { PageBreak } from './PageBreak.tsx';
+import { FontSize } from '../editor-extensions/FontSize.ts'; 
+import { PageBreak } from '../editor-extensions/PageBreak.tsx';
 import FontFamily from '@tiptap/extension-font-family';
 import Color from '@tiptap/extension-color';
+import Underline from '@tiptap/extension-underline';
+
+import { NoteMark } from '../editor-extensions/NoteMark';
+import { v4 as uuidv4 } from 'uuid'; 
 
 // DND Kit Imports
 import { 
   DndContext, closestCenter, KeyboardSensor, PointerSensor, 
   useSensor, useSensors, DragOverlay, useDraggable, useDroppable,
-  defaultKeyboardCoordinateGetter, // Додай це
+  defaultKeyboardCoordinateGetter, 
   type DragEndEvent 
 } from '@dnd-kit/core';
-
 
 // Імпорти іконок Material UI
 import {
@@ -24,7 +29,7 @@ import {
   FormatAlignLeft, FormatAlignCenter, FormatAlignRight, FormatAlignJustify,
   FormatListBulleted, FormatListNumbered, Add, CheckCircleOutlined,
   FolderOpen, KeyboardArrowDown, InsertDriveFile, HorizontalRule,
-  DragIndicator, ChevronLeft, MenuOpen
+  DragIndicator, ChevronLeft, MenuOpen, MoreVert, PushPin, Delete
 } from '@mui/icons-material';
 
 // --- 1. ІНТЕРФЕЙСИ ТА КОНСТАНТИ ---
@@ -75,20 +80,17 @@ type FormatKey = keyof typeof PAGE_FORMATS;
 const StructureItem = ({ item, selectedId, onSelect, onAddSub, handleMoveToRoot, handleDelete, isChild }: any) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  // Налаштування для перетягування (Джерело)
   const { attributes, listeners, setNodeRef: setDraggableRef, isDragging } = useDraggable({
     id: item.id.toString(),
     data: { type: item.type, item }
   });
 
-  // Налаштування для кидання (Ціль - тільки папки приймають файли)
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({
     id: item.id.toString(),
     disabled: item.type !== 'Part', 
     data: { type: item.type }
   });
 
-  // Об'єднуємо рефи для DND
   const setNodeRef = (node: HTMLElement | null) => {
     setDraggableRef(node);
     setDroppableRef(node);
@@ -111,12 +113,10 @@ const StructureItem = ({ item, selectedId, onSelect, onAddSub, handleMoveToRoot,
               : 'bg-transparent border-transparent hover:bg-[#F3EAD3]/40 text-[#433D33]'
         }`}
       >
-        {/* Хендл для перетягування */}
         <div {...attributes} {...listeners} className="cursor-grab opacity-20 hover:opacity-100 p-1 flex items-center">
           <DragIndicator sx={{ fontSize: 16 }} />
         </div>
 
-        {/* Іконка типу елемента */}
         {item.type === 'Part' ? (
           <KeyboardArrowDown sx={{ 
             fontSize: 18, 
@@ -128,11 +128,8 @@ const StructureItem = ({ item, selectedId, onSelect, onAddSub, handleMoveToRoot,
           <InsertDriveFile sx={{ fontSize: 14, opacity: 0.4 }} />
         )}
 
-        {/* Назва та кнопка витягування */}
         <div className="flex items-center gap-2 flex-1 overflow-hidden">
           <span className="text-[13px] truncate">{item.title}</span>
-          
-          {/* Кнопка з'являється тільки для вкладених елементів при наведенні */}
           {isChild && (
             <button 
               onClick={(e) => { 
@@ -147,7 +144,6 @@ const StructureItem = ({ item, selectedId, onSelect, onAddSub, handleMoveToRoot,
           )}
         </div>
 
-        {/* Кнопка додавання глави в папку */}
         {item.type === 'Part' && (
           <button 
             onClick={(e) => { e.stopPropagation(); onAddSub('Chapter', item.id); }} 
@@ -158,7 +154,6 @@ const StructureItem = ({ item, selectedId, onSelect, onAddSub, handleMoveToRoot,
         )}
       </div>
 
-      {/* Рендер вкладених дітей */}
       {isExpanded && item.children && item.children.length > 0 && (
         <div className="flex flex-col border-l border-[#E8E2D2]/60 ml-4 pl-1 mt-1 transition-all">
           {item.children.map((child: any) => (
@@ -214,8 +209,6 @@ const EditorPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // --- УСІ ХУКИ (useState, useRef, useCallback, useEffect) НА САМОМУ ПОЧАТКУ ---
-  
   // Стани книги та структури
   const [book, setBook] = useState<Book | null>(null);
   const [structure, setStructure] = useState<BookElement[]>([]);
@@ -240,6 +233,12 @@ const EditorPage = () => {
   const [showColorDropdown, setShowColorDropdown] = useState(false);
   const [showFormatDropdown, setShowFormatDropdown] = useState(false);
 
+  // Стан для нотаток
+  const [notes, setNotes] = useState<any[]>([]);
+  const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
+  const [rightSidebarTab, setRightSidebarTab] = useState<'Notes' | 'Drafts'>('Notes');
+  const [showAllAuthorNotes, setShowAllAuthorNotes] = useState(true);
+
   // Рефи
   const dropdownRef = useRef<HTMLDivElement>(null);
   const fontDropdownRef = useRef<HTMLDivElement>(null);
@@ -254,7 +253,6 @@ const EditorPage = () => {
     useSensor(KeyboardSensor, { coordinateGetter: defaultKeyboardCoordinateGetter })
   );
 
-  // Функції
   const forceUpdate = useCallback(() => setUpdateTick(tick => tick + 1), []);
 
   const fetchStructure = useCallback(async () => {
@@ -283,7 +281,7 @@ const EditorPage = () => {
         content: content,
         bookId: parseInt(id),
         type: 'Chapter',
-        title: "Chapter" // Можна покращити, шукаючи реальну назву в structure
+        title: "Chapter" 
       } : { 
         ...book, 
         description: content,
@@ -304,13 +302,14 @@ const EditorPage = () => {
     }
   }, [id, book, selectedElementId]);
 
-  // Ініціалізація TipTap
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         bulletList: { keepMarks: true, keepAttributes: false },
         orderedList: { keepMarks: true, keepAttributes: false },
       }),
+      BubbleMenuExtension,
+      Underline,
       TextStyle,
       Color,
       FontSize,
@@ -318,11 +317,21 @@ const EditorPage = () => {
       TextAlign.configure({ 
         types: ['heading', 'paragraph', 'bulletList', 'orderedList'], 
       }),
-      PageBreak, 
+      PageBreak,
+      NoteMark,
     ],
     editorProps: {
       attributes: {
         class: 'outline-none ProseMirror h-full min-h-[500px]',
+      },
+      handleClick: (_view, _pos, event) => {
+        const node = event.target as HTMLElement;
+        const noteId = node.getAttribute('data-note-id');
+        if (noteId) {
+          handleNoteClick(noteId);
+          return true;
+        }
+        return false;
       },
     },
     onUpdate: ({ editor }) => {
@@ -349,7 +358,6 @@ const EditorPage = () => {
     onTransaction: forceUpdate,
   });
 
-  // Ефекти (useEffect)
   useEffect(() => {
     currentFormatRef.current = currentFormat;
   }, [currentFormat]);
@@ -365,7 +373,6 @@ const EditorPage = () => {
         if (!response.ok) throw new Error("Книгу не знайдено");
         const data = await response.json();
         setBook(data);
-        // Завантажуємо опис книги ТІЛЬКИ якщо не вибрана жодна глава
         if (editor && data.description && !selectedElementId) {
           editor.commands.setContent(data.description);
         }
@@ -407,7 +414,13 @@ const EditorPage = () => {
     return () => window.removeEventListener('wheel', handleWheel);
   }, []);
 
-  // --- 4. ПЕРЕВІРКА НА ЗАВАНТАЖЕННЯ (ПІСЛЯ ВСІХ ХУКІВ!) ---
+  useEffect(() => {
+    if (activeNoteId) {
+      const element = document.getElementById(`note-${activeNoteId}`);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [activeNoteId]);
+
   if (!editor || !book) {
     return (
       <div className="flex flex-col flex-1 h-screen w-full items-center justify-center bg-[#F9F5EB]">
@@ -416,7 +429,7 @@ const EditorPage = () => {
     );
   }
 
-  // --- 5. ОБРОБНИКИ ПОДІЙ (HANDLERS) ---
+  // --- 5. ОБРОБНИКИ ПОДІЙ ---
   const handleElementClick = async (elementId: number, type: string) => {
     if (type === 'Part') return; 
     setSelectedElementId(elementId);
@@ -433,11 +446,7 @@ const EditorPage = () => {
 
   const handleAddElement = async (type: 'Part' | 'Chapter', parentId: number | null = null) => {
     if (isAdding) return;
-
-    // 1. ВІЗУАЛ: Запитуємо назву у користувача
     const title = window.prompt(`Введіть назву для ${type === 'Part' ? 'нової частини' : 'нової глави'}:`);
-    
-    // Якщо користувач натиснув "Скасувати" або ввів пусту строку — зупиняємо
     if (!title || title.trim() === '') return;
 
     setIsAdding(true);
@@ -462,9 +471,8 @@ const EditorPage = () => {
       if (response.ok) {
         await fetchStructure();
       } else {
-        const errorText = await response.text();
-        console.error("Бекенд відхилив запит (400):", errorText);
-        alert("Помилка на сервері! Відкрийте консоль (F12) для деталей.");
+        console.error("Бекенд відхилив запит");
+        alert("Помилка на сервері!");
       }
     } catch (err) {
       console.error("Помилка мережі при додаванні:", err);
@@ -485,9 +493,6 @@ const EditorPage = () => {
 
     const draggedId = active.id;
     const overId = over.id;
-
-    // Якщо кинули на папку, вона стає новим батьком. 
-    // Якщо кинули в порожню зону внизу (root-drop-zone), батько стає null.
     const newParentId = overId === 'root-drop-zone' ? null : parseInt(overId.toString());
 
     try {
@@ -514,25 +519,24 @@ const EditorPage = () => {
   };
 
   const handleDeleteElement = async (elementId: number, title: string) => {
-  if (!window.confirm(`Ви впевнені, що хочете видалити "${title}"?`)) return;
+    if (!window.confirm(`Ви впевнені, що хочете видалити "${title}"?`)) return;
 
-  try {
-    const response = await fetch(`http://localhost:5241/api/Books/elements/${elementId}`, {
-      method: 'DELETE',
-    });
+    try {
+      const response = await fetch(`http://localhost:5241/api/Books/elements/${elementId}`, {
+        method: 'DELETE',
+      });
 
-    if (response.ok) {
-      // Якщо ми видалили ту главу, яка зараз відкрита — очищуємо редактор
-      if (selectedElementId === elementId) {
-        setSelectedElementId(null);
-        editor?.commands.setContent('<p></p>');
+      if (response.ok) {
+        if (selectedElementId === elementId) {
+          setSelectedElementId(null);
+          editor?.commands.setContent('<p></p>');
+        }
+        fetchStructure();
       }
-      fetchStructure();
+    } catch (err) {
+      console.error("Помилка при видаленні:", err);
     }
-  } catch (err) {
-    console.error("Помилка при видаленні:", err);
-  }
-};
+  };
 
   const handleFontChange = (family: string) => {
     editor?.chain().focus().setFontFamily(family).run();
@@ -543,7 +547,7 @@ const EditorPage = () => {
     setFontSizeInput(value);
     const size = parseInt(value);
     if (!isNaN(size) && size > 0 && size < 200) {
-      editor?.chain().focus().setFontSize(`${size}pt`).run();
+      (editor?.chain().focus() as any).setFontSize(`${size}pt`).run();
     }
     setShowSizeDropdown(false);
   };
@@ -556,7 +560,75 @@ const EditorPage = () => {
     }
   };
 
-  // Flat array of IDs needed for DndKit root level context
+  // --- НОВА ЛОГІКА НОТАТОК ---
+  
+  const handleAddNote = () => {
+    if (!editor || editor.state.selection.empty) {
+      alert("Будь ласка, виділіть текст у редакторі, до якого хочете додати нотатку.");
+      return;
+    }
+
+    const noteId = uuidv4();
+    // Використовуємо вашу кастомну марку NoteMark
+    editor.chain().setNote({ id: noteId, type: 'Author' }).run();
+
+    const newNote = {
+      id: noteId,
+      type: 'Author',
+      content: '',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isResolved: false
+    };
+
+    setNotes(prev => [...prev, newNote]);
+    setActiveNoteId(noteId);
+    setRightSidebarTab('Notes'); // Автоматично відкриваємо вкладку нотаток
+
+    editor.commands.blur();
+
+    setTimeout(() => {
+    const inputElement = document.getElementById(`input-note-${noteId}`);
+    if (inputElement) {
+      inputElement.focus();
+      // Для надійності ще раз викликаємо фокус через 100мс
+      setTimeout(() => inputElement.focus(), 50);
+    }
+  }, 100);
+  };
+
+  const handleNoteClick = (noteId: string) => {
+    setActiveNoteId(noteId);
+    setRightSidebarTab('Notes');
+    
+    if (!editor) return;
+    let found = false;
+    editor.state.doc.descendants((node, pos) => {
+      if (found) return false;
+      const noteMark = node.marks.find(mark => mark.type.name === 'note' && mark.attrs.id === noteId);
+      if (noteMark) {
+        editor.chain().focus().setTextSelection({ from: pos, to: pos + node.nodeSize }).scrollIntoView().run();
+        found = true;
+        return false;
+      }
+    });
+  };
+
+  const handleDeleteNote = (noteId: string) => {
+    if (!window.confirm("Видалити цю нотатку?")) return;
+    
+    // Видаляємо з масиву
+    setNotes(prev => prev.filter(n => n.id !== noteId));
+    
+    // Якщо нотатка була активною, знімаємо фокус
+    if (activeNoteId === noteId) {
+      setActiveNoteId(null);
+    }
+
+    // Примітка: Щоб повністю прибрати маркування тексту (стиль), потрібно, щоб у 
+    // вашому розширенні NoteMark була команда unsetNote(). 
+    // Якщо її там немає, то візуальне виділення тексту залишиться.
+  };
+
   // --- 6. JSX РЕНДЕР ---
   return (
     <div className="flex flex-col flex-1 h-full overflow-hidden bg-[#F9F5EB]">
@@ -571,8 +643,7 @@ const EditorPage = () => {
         </button>
       )}
         
-        {/* ЛІВА ПАНЕЛЬ (Структура проекту) */}
-
+        {/* ЛІВА ПАНЕЛЬ */}
         <aside 
           className="bg-[#FFFCF5] rounded-r-[32px] border-r border-[#E8E2D2]/50 flex flex-col shrink-0 mb-0 shadow-sm overflow-hidden h-full transition-all duration-500 ease-in-out z-50"
           style={{ 
@@ -582,7 +653,6 @@ const EditorPage = () => {
           }}
         >
           <div className="p-5 flex flex-col h-full w-[240px]">
-            {/* Заголовок панелі */}
             <div className="flex items-center justify-between mb-6 px-1">
               <h3 className="font-serif text-xl font-bold text-[#433D33]">Book Map</h3>
               <button 
@@ -606,12 +676,9 @@ const EditorPage = () => {
                 >
                   <Add sx={{ fontSize: 22 }} />
                 </button>
-
-
               </div>
             </div>
 
-            {/* Основна область списку з DND */}
             <div className="flex-1 overflow-y-auto pr-1 scrollbar-hide">
               {structure.length > 0 ? (
                 <DndContext 
@@ -620,7 +687,6 @@ const EditorPage = () => {
                   onDragStart={handleDragStart} 
                   onDragEnd={handleDragEnd}
                 >
-                  {/* Глобальна зона для перетягування (Скидання в корінь) */}
                   <div 
                     ref={setRootDropRef} 
                     className={`space-y-1 min-h-[400px] pb-40 transition-all rounded-2xl p-1 ${
@@ -636,7 +702,7 @@ const EditorPage = () => {
                         onAddSub={handleAddElement}
                         handleMoveToRoot={handleMoveToRoot}
                         handleDelete={handleDeleteElement}
-                        isChild={false} // Кореневі елементи
+                        isChild={false} 
                       />
                     ))}
                     
@@ -649,7 +715,6 @@ const EditorPage = () => {
                     )}
                   </div>
 
-                  {/* Привид елемента під курсором */}
                   <DragOverlay dropAnimation={null}>
                     {activeItem ? (
                       <div className="flex items-center gap-2 py-2 px-4 bg-[#FFFCF5] border-2 border-[#4A0E0E]/20 text-[#410D0D] rounded-xl shadow-2xl opacity-95 scale-[1.05] cursor-grabbing min-w-[200px] z-[1000]">
@@ -672,7 +737,6 @@ const EditorPage = () => {
               )}
             </div>
 
-            {/* Картка автора внизу */}
             <div className="mt-auto pt-4 border-t border-[#E8E2D2]/30">
               <div className="flex items-center justify-between px-2 py-3 bg-[#F3EAD3]/30 rounded-2xl cursor-pointer hover:bg-[#F3EAD3]/50 transition-all group">
                 <div className="flex items-center gap-3">
@@ -691,7 +755,7 @@ const EditorPage = () => {
         </aside>
 
         {/* ЦЕНТРАЛЬНА РОБОЧА ЗОНА */}
-        <main 
+        <main
           ref={editorContainerRef} 
           className="flex-1 overflow-y-auto flex flex-col items-center scrollbar-hide bg-[#EAD9C6]/20 relative pt-4"
         >
@@ -875,6 +939,20 @@ const EditorPage = () => {
             </button>
 
             <div className="w-px h-6 bg-gray-200 mx-2" />
+            
+            {/* КНОПКА ДОДАВАННЯ НОТАТКИ */}
+            <button 
+              onMouseDown={(e) => { 
+                e.preventDefault(); 
+                handleAddNote(); 
+              }}
+              className="p-2 rounded-lg transition-all text-green-600 hover:bg-green-100"
+              title="Додати нотатку до виділеного тексту"
+            >
+              <PushPin sx={{ fontSize: 20 }} />
+            </button>
+
+            <div className="w-px h-6 bg-gray-200 mx-2" />
 
             <div className="relative" ref={formatDropdownRef}>
               <button 
@@ -957,6 +1035,54 @@ const EditorPage = () => {
                   flexDirection: 'column'
                 }}
               >
+                {editor && (
+    <BubbleMenu 
+      editor={editor} 
+      tippyOptions={{ duration: 100, placement: 'top' }} 
+      className="bg-white shadow-xl border border-[#E8E2D2] rounded-xl flex items-center p-1.5 gap-1 z-50"
+    >
+      {/* Кнопки форматування */}
+      <button 
+        onClick={() => editor.chain().focus().toggleBold().run()} 
+        className={`p-1.5 rounded-lg transition-colors ${editor.isActive('bold') ? 'bg-[#F3EAD3] text-[#4A0E0E]' : 'text-gray-500 hover:bg-gray-100'}`}
+      >
+        <FormatBold sx={{ fontSize: 18 }} />
+      </button>
+      
+      <button 
+        onClick={() => editor.chain().focus().toggleItalic().run()} 
+        className={`p-1.5 rounded-lg transition-colors ${editor.isActive('italic') ? 'bg-[#F3EAD3] text-[#4A0E0E]' : 'text-gray-500 hover:bg-gray-100'}`}
+      >
+        <FormatItalic sx={{ fontSize: 18 }} />
+      </button>
+
+      <button 
+        onClick={() => editor.chain().focus().toggleUnderline().run()} 
+        className={`p-1.5 rounded-lg transition-colors ${editor.isActive('underline') ? 'bg-[#F3EAD3] text-[#4A0E0E]' : 'text-gray-500 hover:bg-gray-100'}`}
+      >
+        <FormatUnderlined sx={{ fontSize: 18 }} />
+      </button>
+
+      {/* Вертикальна лінія-розділювач */}
+      <div className="w-px h-5 bg-gray-200 mx-1" />
+
+      {/* ВАША КНОПКА ДОДАВАННЯ НОТАТКИ */}
+      <button 
+        onMouseDown={(e) => { 
+          e.preventDefault(); 
+          e.stopPropagation(); 
+          handleAddNote(); 
+        }}
+        className="p-1.5 rounded-lg text-green-600 hover:bg-green-50 transition-colors flex items-center gap-1"
+        title="Додати нотатку"
+      >
+        <PushPin sx={{ fontSize: 18 }} />
+        <span className="text-xs font-bold pr-1">Коментар</span>
+      </button>
+    </BubbleMenu>
+  )}
+
+
                 <EditorContent 
                   editor={editor} 
                   className="h-full w-full" 
@@ -968,17 +1094,87 @@ const EditorPage = () => {
         </main>
 
         {/* ПРАВА ПАНЕЛЬ */}
-        <aside className="w-60 bg-[#FFFCF5] rounded-l-[24px] border border-[#E8E2D2]/50 flex flex-col shrink-0 mb-0 shadow-sm overflow-hidden">
-          <div className="p-6">
-            <h4 className="font-bold text-xs mb-4 text-gray-400 uppercase tracking-widest">Notes</h4>
-            <div className="bg-green-50 p-4 rounded-2xl border border-green-100 mb-4 relative">
-                <CheckCircleOutlined className="text-green-500 absolute top-4 right-4" sx={{ fontSize: 18 }} />
-                <span className="text-[10px] font-bold text-green-600 block mb-1 uppercase">Comment</span>
-                <p className="text-xs text-green-800 leading-relaxed pr-6">Ця панель допоможе вам у роботі над LiberInk.</p>
-            </div>
-            <button className="w-full py-4 border-2 border-dashed border-gray-100 rounded-2xl text-gray-300 hover:text-orange-400 transition-all">
-              <Add />
+        <aside className="w-80 bg-[#FFFCF5] border-l border-[#E8E2D2]/50 flex flex-col shrink-0 mb-0 shadow-sm overflow-hidden h-full z-50 rounded-tl-[40px]">
+          <div className="flex border-b border-[#E8E2D2]/50">
+            <button onClick={() => setRightSidebarTab('Notes')} className={`flex-1 py-4 text-sm font-bold relative ${rightSidebarTab === 'Notes' ? 'text-[#4A0E0E]' : 'text-gray-400'}`}>
+              Notes {rightSidebarTab === 'Notes' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#4A0E0E] rounded-t-full" />}
             </button>
+            <button onClick={() => setRightSidebarTab('Drafts')} className={`flex-1 py-4 text-sm font-bold relative ${rightSidebarTab === 'Drafts' ? 'text-[#4A0E0E]' : 'text-gray-400'}`}>
+              Drafts {rightSidebarTab === 'Drafts' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#4A0E0E] rounded-t-full" />}
+            </button>
+          </div>
+
+          <div className="p-6 flex flex-col h-full overflow-y-auto scrollbar-hide">
+            {rightSidebarTab === 'Notes' ? (
+              <div className="mb-8">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="font-serif text-[#27AE60] text-lg flex-1 text-center ml-8">Author’s Notes</h4>
+                  <button 
+                    onClick={() => setShowAllAuthorNotes(!showAllAuthorNotes)}
+                    className={`p-1 rounded-md border transition-all ${showAllAuthorNotes ? 'bg-green-100 border-green-500' : 'bg-gray-100 border-gray-300'}`}
+                    title={showAllAuthorNotes ? "Показати тільки активну" : "Показати всі"}
+                  >
+                    <CheckCircleOutlined sx={{ fontSize: 16, color: showAllAuthorNotes ? '#27AE60' : 'gray' }} />
+                  </button>
+                </div>
+                
+                <div className="space-y-3">
+                  {notes.length === 0 && (
+                    <div className="text-center text-xs text-gray-400 py-4 italic">
+                      Немає нотаток. Виділіть текст і натисніть іконку булавки на панелі інструментів зверху.
+                    </div>
+                  )}
+                  {notes
+                    .filter(n => n.type === 'Author')
+                    .filter(n => showAllAuthorNotes || n.id === activeNoteId)
+                    .map(note => (
+                      <div 
+                        key={note.id} 
+                        id={`note-${note.id}`}
+                        onClick={() => handleNoteClick(note.id)} 
+                        className={`p-3 rounded-2xl border relative group shadow-sm transition-all cursor-pointer ${
+                          activeNoteId === note.id ? 'ring-2 ring-offset-2 ring-[#4A0E0E] bg-green-200 border-green-500' : 'bg-[#E2F5E5] border-[#BDE7C7]'
+                        }`}
+                      >
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-[9px] text-gray-500 font-medium">{note.time} Today</span>
+                          <div className="flex items-center gap-1">
+                            {/* Кнопка видалення нотатки */}
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteNote(note.id);
+                              }}
+                              className="text-gray-400 hover:text-red-500 transition-colors"
+                              title="Видалити нотатку"
+                            >
+                              <Delete sx={{ fontSize: 16 }} />
+                            </button>
+                          </div>
+                        </div>
+                        <input
+                        id={`input-note-${note.id}`}
+                          className="w-full bg-transparent text-xs font-bold text-[#2D3436] outline-none"
+                          value={note.content || ""}
+                          placeholder="Введіть коментар..."
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onFocus={(e) => e.stopPropagation()}
+                          onChange={(e) => setNotes(notes.map(n => n.id === note.id ? {...n, content: e.target.value} : n))}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              editor?.commands.focus();
+                            }
+                          }}
+                        />
+                      </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-40 opacity-30 italic text-sm text-center">
+                Drafts list will be here...
+              </div>
+            )}
           </div>
         </aside>
       </div>
