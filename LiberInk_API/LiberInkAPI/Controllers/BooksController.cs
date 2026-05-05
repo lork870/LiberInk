@@ -33,6 +33,7 @@ namespace LiberInkAPI.Controllers
             return CreatedAtAction(nameof(GetUserBooks), new { userId = book.UserId }, book);
         }
 
+        // 1. Метод для отримання однієї конкретної книги (щоб відкрити її в редакторі)
         [HttpGet("{id}")]
         public async Task<ActionResult<Book>> GetBook(int id)
         {
