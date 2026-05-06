@@ -1,0 +1,26 @@
+# --- Android / Kotlin (LiberInk_Mobile) ---
+LiberInk_Mobile/.gradle/
+LiberInk_Mobile/build/
+LiberInk_Mobile/captures/
+LiberInk_Mobile/local.properties
+LiberInk_Mobile/.idea/workspace.xml
+LiberInk_Mobile/.idea/libraries/
+LiberInk_Mobile/*.iml
+LiberInk_Mobile/app/build/
+
+# --- React / Web (LiberInk_Web) ---
+LiberInk_Web/node_modules/
+LiberInk_Web/build/
+LiberInk_Web/.env.local
+LiberInk_Web/npm-debug.log*
+
+# --- ASP.NET Core / API (LiberInk_API) ---
+LiberInk_API/bin/
+LiberInk_API/obj/
+LiberInk_API/TestResults/
+LiberInk_API/*.user
+LiberInk_API/.vs/
+
+# --- Загальні системні файли ---
+.DS_Store
+Thumbs.db

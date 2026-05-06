@@ -24,3 +24,10 @@ LiberInk_API/.vs/
 # --- Загальні системні файли ---
 .DS_Store
 Thumbs.db
+
+**/bin/
+**/obj/
+*.dll
+*.exe
+*.pdb
+.idea/
