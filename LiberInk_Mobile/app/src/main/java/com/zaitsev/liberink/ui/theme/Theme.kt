@@ -9,6 +9,21 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
+object ThemeManager {
+    var isDarkTheme by mutableStateOf(false)
+
+    fun initialize(context: android.content.Context) {
+        val prefs = context.getSharedPreferences("liberink_prefs", android.content.Context.MODE_PRIVATE)
+        isDarkTheme = prefs.getBoolean("is_dark_theme", false)
+    }
+
+    fun toggleTheme(context: android.content.Context) {
+        isDarkTheme = !isDarkTheme
+        val prefs = context.getSharedPreferences("liberink_prefs", android.content.Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("is_dark_theme", isDarkTheme).apply()
+    }
+}
+
 // 1. Custom class to hold all your specific UI roles
 @Immutable
 data class LiberInkColors(
@@ -48,7 +63,7 @@ private val DarkCustomPalette = LiberInkColors(
     secondaryInk = MutedRose,
     paperMain = Charcoal,
     paperElevated = RichBlack,
-    paperTexture = Charcoal,
+    paperTexture = PureBlack,
     accentGold = AmberGold,
     accentTerracotta = Terracotta,
     dividerStrong = White20,
