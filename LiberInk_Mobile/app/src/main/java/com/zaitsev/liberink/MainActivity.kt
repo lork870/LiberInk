@@ -62,10 +62,8 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            // Використовуємо глобальний стан для перемикання теми
             LiberInkTheme(darkTheme = ThemeManager.isDarkTheme) {
 
-                // Основний контейнер, який реагує на зміну палітри кольорів
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = LiberInkTheme.colors.paperMain
