@@ -32,6 +32,7 @@ import com.zaitsev.liberink.data.RetrofitClient
 import com.zaitsev.liberink.R
 import kotlinx.coroutines.launch
 import com.zaitsev.liberink.ui.theme.ThemeManager
+import com.zaitsev.liberink.utils.toFormattedDate
 
 data class StoryInfo(
     val id: String,
@@ -149,10 +150,11 @@ fun HomeScreen(navController: NavController) {
                     modifier = Modifier.weight(1f)
                 ) {
                     items(items = filteredStories, key = { it.id }) { book ->
+                        val formattedDate = book.createdAt.toFormattedDate()
                         val displayStory = StoryInfo(
                             id = book.id.toString(),
                             title = book.title,
-                            date = "Apr 22, 2026",
+                            date = formattedDate,
                             draftCount = 1,
                             coverColor = CoverBlue
                         )
@@ -162,6 +164,12 @@ fun HomeScreen(navController: NavController) {
                             onDelete = {
                                 bookToDeleteId = book.id
                                 showDeleteDialog = true
+                            },
+                            onClick = {
+                                val encodedTitle = java.net.URLEncoder.encode(book.title, "UTF-8")
+                                val encodedContent = java.net.URLEncoder.encode(book.description ?: "No content available...", "UTF-8")
+
+                                navController.navigate("reader_screen?bookId=${book.id}&title=$encodedTitle&content=$encodedContent")
                             }
                         )
                     }
@@ -427,13 +435,15 @@ fun LatestDraftCard(story: StoryInfo) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StoryGridCard(story: StoryInfo, onDelete: () -> Unit) {
+fun StoryGridCard(story: StoryInfo, onDelete: () -> Unit, onClick: () -> Unit) { // ДОДАНО onClick
     val theme = LiberInkTheme.colors
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(6.dp, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onClick() }
             .background(LiberInkTheme.colors.paperElevated, RoundedCornerShape(16.dp))
             .padding(12.dp)
     ) {

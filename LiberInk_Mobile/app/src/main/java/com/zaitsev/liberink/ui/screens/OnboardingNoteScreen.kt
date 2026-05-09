@@ -255,12 +255,14 @@ fun OnboardingNoteScreen(navController: NavController) {
                                 db.collection("onboarding_notes")
                                     .add(fullNoteData)
                                     .addOnSuccessListener { documentReference ->
+
+                                        navController.navigate("registration?noteId=${documentReference.id}")
                                         isLoading = false
                                         println("Успішно збережено з ID: ${documentReference.id}")
 
                                         // Переходимо на екран реєстрації
                                         // Можна передати ID документа, щоб потім прив'язати його до юзера
-                                        navController.navigate("registration")
+                                        navController.navigate("registration?noteId=${documentReference.id}")
                                     }
                                     .addOnFailureListener { e ->
                                         isLoading = false

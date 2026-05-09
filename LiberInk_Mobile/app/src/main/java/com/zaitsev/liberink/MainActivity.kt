@@ -72,14 +72,16 @@ class MainActivity : ComponentActivity() {
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val currentRoute = navBackStackEntry?.destination?.route
 
-                    // Екрани, на яких не треба показувати нижню навігацію
                     val screensWithoutBottomBar = listOf(
-                        "onboarding", "authorization", "registration", "onboardingNoteScreen"
+                        "onboarding", "authorization", "onboardingNoteScreen"
                     )
 
-                    val shouldShowBottomBar = currentRoute !in screensWithoutBottomBar &&
-                            currentRoute?.startsWith("create_note") == false &&
-                            currentRoute != null
+                    val shouldShowBottomBar = currentRoute != null &&
+                            currentRoute !in screensWithoutBottomBar &&
+                            !currentRoute.startsWith("create_note") &&
+                            !currentRoute.startsWith("registration") &&
+                            !currentRoute.startsWith("reader_screen")
+
 
                     Scaffold(
                         containerColor = LiberInkTheme.colors.paperMain,
@@ -129,6 +131,30 @@ class MainActivity : ComponentActivity() {
                             }
 
                             composable(Screen.Home.route) { HomeScreen(navController) }
+
+                            composable(
+                                route = "reader_screen?bookId={bookId}&title={title}&content={content}",
+                                arguments = listOf(
+                                    navArgument("bookId") { type = NavType.StringType; nullable = true },
+                                    navArgument("title") { type = NavType.StringType; nullable = true },
+                                    navArgument("content") { type = NavType.StringType; nullable = true }
+                                )
+                            ) { backStackEntry ->
+                                val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
+                                val rawTitle = backStackEntry.arguments?.getString("title") ?: "Untitled"
+                                val rawContent = backStackEntry.arguments?.getString("content") ?: ""
+
+                                val title = try { URLDecoder.decode(rawTitle, "UTF-8") } catch (e: Exception) { rawTitle }
+                                val content = try { URLDecoder.decode(rawContent, "UTF-8") } catch (e: Exception) { rawContent }
+
+                                ReaderScreen(
+                                    navController = navController,
+                                    bookId = bookId,
+                                    title = title,
+                                    content = content
+                                )
+                            }
+
                             composable(Screen.Notes.route) { NotesScreen(navController) }
 
                             composable(
@@ -155,7 +181,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             composable(Screen.Lore.route) { PlaceholderScreen("Lore & Worldbuilding") }
-                            composable(Screen.Profile.route) { PlaceholderScreen("User Profile") }
+                            composable(Screen.Profile.route) { ProfileScreen(navController) }
                         }
                     }
                 }

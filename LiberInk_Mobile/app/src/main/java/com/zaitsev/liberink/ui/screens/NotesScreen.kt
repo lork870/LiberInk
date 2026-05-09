@@ -63,7 +63,9 @@ fun NotesScreen(navController: NavController) {
                         return@addSnapshotListener
                     }
                     if (snapshot != null) {
-                        val fetchedNotes = snapshot.toObjects(NoteItem::class.java)
+                        val fetchedNotes = snapshot.documents.mapNotNull { doc ->
+                            doc.toObject(NoteItem::class.java)?.copy(id = doc.id)
+                        }
                         notes.clear()
                         notes.addAll(fetchedNotes)
                     }

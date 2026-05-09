@@ -1,6 +1,7 @@
 package com.zaitsev.liberink.ui.screens
 
 import android.graphics.Paint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateDpAsState
@@ -42,6 +43,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.CustomCredential
 import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.zaitsev.liberink.R
@@ -62,7 +64,6 @@ fun RegistrationScreen(navController: NavController, noteId: String? = null) {
     val scope = rememberCoroutineScope()
 
     val auth = remember { FirebaseAuth.getInstance() }
-    val db = remember { FirebaseFirestore.getInstance() }
 
     var googleAccountName by remember { mutableStateOf<String?>(null) }
     var name by rememberSaveable { mutableStateOf("") }
@@ -76,6 +77,7 @@ fun RegistrationScreen(navController: NavController, noteId: String? = null) {
     val scale by animateFloatAsState(if (isPressed) 0.96f else 1f, label = "scale")
     val animatedOffset by animateDpAsState(if (isPressed) 4.dp else 0.dp, label = "offset")
 
+    // Ефект після успішної реєстрації
     if (isSuccess) {
         LaunchedEffect(Unit) {
             delay(2000)
@@ -105,24 +107,8 @@ fun RegistrationScreen(navController: NavController, noteId: String? = null) {
                 color = theme.mainInk
             )
 
-            if (googleAccountName != null) {
-                Surface(
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    color = Color(0xFFE8F5E9),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color(0xFF2E7D32))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Signed in as $googleAccountName", color = Color(0xFF2E7D32), fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-            } else {
-                Text("Start writing your story today", fontSize = 16.sp, color = theme.secondaryInk)
-            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Start writing your story today", fontSize = 16.sp, color = theme.secondaryInk)
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -158,141 +144,212 @@ fun RegistrationScreen(navController: NavController, noteId: String? = null) {
             ) {
                 Crossfade(targetState = isSuccess, label = "Success Fade") { success ->
                     if (success) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(vertical = 32.dp)
-                        ) {
-                            Box(modifier = Modifier.size(72.dp).background(Color(0xFF4CAF50), CircleShape), contentAlignment = Alignment.Center) {
-                                Icon(Icons.Default.Check, contentDescription = "Success", tint = Color.White, modifier = Modifier.size(40.dp))
-                            }
-                            Spacer(modifier = Modifier.height(24.dp))
-                            Text("Welcome, ${googleAccountName ?: name}!", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = DarkWine)
-                            Text("Redirecting to library...", fontSize = 16.sp, color = Color.Gray)
-                        }
+                        SuccessContent(googleAccountName ?: name)
                     } else {
-                        Column {
-                            OutlinedTextField(
-                                value = name, onValueChange = { name = it },
-                                label = { Text("Name *") },
-                                placeholder = { Text("Your Name", color = DarkWine20) },
-                                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
-                                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = theme.mainInk)
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            OutlinedTextField(
-                                value = email, onValueChange = { email = it },
-                                label = { Text("Email *") },
-                                placeholder = { Text("You@example.com", color = DarkWine20) },
-                                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
-                                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = theme.mainInk)
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            OutlinedTextField(
-                                value = password, onValueChange = { password = it },
-                                label = { Text("Password *") },
-                                visualTransformation = PasswordVisualTransformation(),
-                                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
-                                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = theme.mainInk)
-                            )
-                            Spacer(modifier = Modifier.height(32.dp))
-
-                            Button(
-                                onClick = {
-                                    if (name.isBlank() || email.isBlank() || password.length < 6) {
-                                        Toast.makeText(context, "Check your inputs (Password min 6 chars)", Toast.LENGTH_SHORT).show()
-                                        return@Button
-                                    }
+                        RegistrationForm(
+                            name = name, onNameChange = { name = it },
+                            email = email, onEmailChange = { email = it },
+                            password = password, onPasswordChange = { password = it },
+                            isLoading = isLoading,
+                            theme = theme,
+                            interactionSource = interactionSource,
+                            scale = scale,
+                            animatedOffset = animatedOffset,
+                            onCreateClick = {
+                                if (name.isBlank() || email.isBlank() || password.length < 6) {
+                                    Toast.makeText(context, "Check your inputs!", Toast.LENGTH_SHORT).show()
+                                } else {
                                     isLoading = true
                                     auth.createUserWithEmailAndPassword(email.trim(), password)
                                         .addOnSuccessListener { result ->
-                                            val profileUpdates = com.google.firebase.auth.userProfileChangeRequest { displayName = name }
-                                            result.user?.updateProfile(profileUpdates)?.addOnCompleteListener {
-                                                val uid = result.user?.uid
-                                                if (noteId != null && uid != null) {
-                                                    db.collection("onboarding_notes").document(noteId)
-                                                        .update("ownerId", uid, "author_name", name, "isTemporary", false)
-                                                        .addOnCompleteListener {
-                                                            isLoading = false
-                                                            isSuccess = true
-                                                        }
-                                                } else {
+                                            val uid = result.user?.uid
+                                            if (noteId != null && uid != null) {
+                                                transferNote(noteId, uid) {
                                                     isLoading = false
                                                     isSuccess = true
                                                 }
+                                            } else {
+                                                isLoading = false
+                                                isSuccess = true
                                             }
                                         }
                                         .addOnFailureListener { e ->
                                             isLoading = false
-                                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                                            Toast.makeText(context, e.localizedMessage, Toast.LENGTH_LONG).show()
                                         }
-                                },
-                                enabled = !isLoading,
-                                interactionSource = interactionSource,
-                                modifier = Modifier.fillMaxWidth().height(56.dp).graphicsLayer { scaleX = scale; scaleY = scale; translationY = animatedOffset.toPx() },
-                                colors = ButtonDefaults.buttonColors(containerColor = theme.mainInk, contentColor = theme.paperElevated),
-                                shape = RoundedCornerShape(28.dp)
-                            ) {
-                                if (isLoading) CircularProgressIndicator(modifier = Modifier.size(24.dp), color = theme.paperElevated, strokeWidth = 2.dp)
-                                else Text("Create Account", fontSize = 20.sp, fontWeight = FontWeight.Medium)
-                            }
-
-                            Spacer(modifier = Modifier.height(24.dp))
-
-                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                                HorizontalDivider(modifier = Modifier.weight(1f), thickness = 1.dp, color = theme.dividerStrong)
-                                Text(" Or continue with ", fontSize = 14.sp, color = theme.secondaryInk, modifier = Modifier.padding(horizontal = 8.dp))
-                                HorizontalDivider(modifier = Modifier.weight(1f), thickness = 1.dp, color = theme.dividerStrong)
-                            }
-
-                            Spacer(modifier = Modifier.height(24.dp))
-
-                            OutlinedButton(
-                                onClick = {
-                                    signUpWithGoogle(
-                                        context = context,
-                                        scope = scope,
-                                        noteId = noteId,
-                                        onLoading = { isLoading = it },
-                                        onSuccess = { resultName ->
-                                            googleAccountName = resultName
-                                            isSuccess = true
-                                        }
-                                    )
-                                },
-                                modifier = Modifier.fillMaxWidth().height(56.dp),
-                                shape = RoundedCornerShape(28.dp),
-                                border = BorderStroke(1.dp, color = DarkWine50),
-                                enabled = !isLoading
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                                    Image(painter = painterResource(id = R.drawable.ic_google_logo), contentDescription = "Google Logo", modifier = Modifier.size(24.dp))
-                                    Spacer(modifier = Modifier.width(12.dp))
-                                    Text("Sign up with Google", fontSize = 16.sp, color = DarkWine, fontWeight = FontWeight.Medium)
+                                }
+                            },
+                            onGoogleClick = {
+                                signUpWithGoogle(context, scope, noteId, { isLoading = it }) { resultName ->
+                                    googleAccountName = resultName
+                                    isSuccess = true
                                 }
                             }
-                        }
+                        )
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
         if (!isSuccess) {
-            TextButton(onClick = { navController.navigate("authorization") }, modifier = Modifier.padding(bottom = 32.dp)) {
-                Text(text = "Don't have an account? ", color = Color.Gray, fontSize = 18.sp, style = MaterialTheme.typography.bodyLarge)
+            SignInFooter(navController, theme)
+        }
+    }
+}
 
-                Text(
-                    text = "Sign in",
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = theme.mainInk),
-                    fontSize = 18.sp,
-                    modifier = Modifier.drawBehind {
-                        drawLine(color = theme.mainInk, start = Offset(0f, size.height + 4.dp.toPx()), end = Offset(size.width, size.height + 4.dp.toPx()), strokeWidth = 1.dp.toPx())
-                    }
-                )
+@Composable
+fun SuccessContent(userName: String) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(vertical = 32.dp)
+    ) {
+        Box(modifier = Modifier.size(72.dp).background(Color(0xFF4CAF50), CircleShape), contentAlignment = Alignment.Center) {
+            Icon(Icons.Default.Check, contentDescription = "Success", tint = Color.White, modifier = Modifier.size(40.dp))
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        Text("Welcome, $userName!", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = DarkWine)
+        Text("Redirecting to library...", fontSize = 16.sp, color = Color.Gray)
+    }
+}
+
+@Composable
+fun RegistrationForm(
+    name: String, onNameChange: (String) -> Unit,
+    email: String, onEmailChange: (String) -> Unit,
+    password: String, onPasswordChange: (String) -> Unit,
+    isLoading: Boolean,
+    theme: com.zaitsev.liberink.ui.theme.LiberInkColors,
+    interactionSource: MutableInteractionSource,
+    scale: Float,
+    animatedOffset: androidx.compose.ui.unit.Dp,
+    onCreateClick: () -> Unit,
+    onGoogleClick: () -> Unit
+) {
+    Column {
+        OutlinedTextField(
+            value = name, onValueChange = onNameChange,
+            label = { Text("Name *") },
+            modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = theme.mainInk)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        OutlinedTextField(
+            value = email, onValueChange = onEmailChange,
+            label = { Text("Email *") },
+            modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = theme.mainInk)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        OutlinedTextField(
+            value = password, onValueChange = onPasswordChange,
+            label = { Text("Password *") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = theme.mainInk)
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = onCreateClick,
+            enabled = !isLoading,
+            interactionSource = interactionSource,
+            modifier = Modifier.fillMaxWidth().height(56.dp).graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+                translationY = animatedOffset.toPx()
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = theme.mainInk),
+            shape = RoundedCornerShape(28.dp)
+        ) {
+            if (isLoading) CircularProgressIndicator(modifier = Modifier.size(24.dp), color = theme.paperElevated, strokeWidth = 2.dp)
+            else Text("Create Account", fontSize = 20.sp, fontWeight = FontWeight.Medium)
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            HorizontalDivider(modifier = Modifier.weight(1f), color = theme.dividerStrong)
+            Text(" Or continue with ", fontSize = 14.sp, color = theme.secondaryInk, modifier = Modifier.padding(horizontal = 8.dp))
+            HorizontalDivider(modifier = Modifier.weight(1f), color = theme.dividerStrong)
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        OutlinedButton(
+            onClick = onGoogleClick,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = RoundedCornerShape(28.dp),
+            border = BorderStroke(1.dp, color = DarkWine50),
+            enabled = !isLoading
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(painter = painterResource(id = R.drawable.ic_google_logo), contentDescription = null, modifier = Modifier.size(24.dp))
+                Spacer(modifier = Modifier.width(12.dp))
+                Text("Sign up with Google", color = DarkWine, fontWeight = FontWeight.Medium)
             }
         }
     }
+}
+
+@Composable
+fun SignInFooter(navController: NavController, theme: com.zaitsev.liberink.ui.theme.LiberInkColors) {
+    TextButton(onClick = { navController.navigate("authorization") }, modifier = Modifier.padding(top = 16.dp, bottom = 32.dp)) {
+        Text("Already have an account? ", color = Color.Gray, fontSize = 18.sp)
+        Text("Sign in", color = theme.mainInk, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+    }
+}
+
+/**
+ * Логіка переносу нотатки з онбордингу до основного профілю
+ */
+/**
+ * Логіка переносу нотатки та створення профілю автора
+ */
+fun transferNote(tempNoteId: String, uid: String, onComplete: () -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    db.collection("onboarding_notes").document(tempNoteId).get()
+        .addOnSuccessListener { snapshot ->
+            if (snapshot.exists()) {
+                val data = snapshot.data?.toMutableMap() ?: mutableMapOf()
+
+                // 1. ЗБЕРІГАЄМО ПРОФІЛЬ АВТОРА
+                val penName = data["author_pen_name"] ?: ""
+                val bio = data["author_bio"] ?: ""
+
+                val userData = hashMapOf(
+                    "penName" to penName,
+                    "bio" to bio
+                )
+                // Записуємо в колекцію "users" за ID користувача
+                db.collection("users").document(uid).set(userData, com.google.firebase.firestore.SetOptions.merge())
+
+                // 2. ГОТУЄМО НОТАТКУ
+                // Видаляємо дані профілю з нотатки, щоб не смітити в базі
+                data.remove("author_pen_name")
+                data.remove("author_bio")
+
+                data["userId"] = uid
+                data["isTemporary"] = false
+
+                if (data.containsKey("description")) {
+                    data["content"] = data["description"]
+                    data.remove("description") // Видаляємо старе поле
+                }
+                data["timestamp"] = System.currentTimeMillis()
+                data["type"] = "text"
+
+                // 3. ЗБЕРІГАЄМО НОТАТКУ
+                db.collection("notes").add(data)
+                    .addOnSuccessListener {
+                        db.collection("onboarding_notes").document(tempNoteId).delete()
+                        onComplete()
+                    }
+                    .addOnFailureListener { onComplete() }
+            } else {
+                onComplete()
+            }
+        }
+        .addOnFailureListener { onComplete() }
 }
 
 fun signUpWithGoogle(
@@ -304,7 +361,6 @@ fun signUpWithGoogle(
 ) {
     val credentialManager = CredentialManager.create(context)
     val auth = FirebaseAuth.getInstance()
-    val db = FirebaseFirestore.getInstance()
     val webClientId = "74885674202-j2k0f2ijc8crcghkfibpb7jlrc1bs58a.apps.googleusercontent.com"
 
     val googleIdOption = GetGoogleIdOption.Builder()
@@ -329,27 +385,22 @@ fun signUpWithGoogle(
                     .addOnSuccessListener { authResult ->
                         val uid = authResult.user?.uid
                         val userName = authResult.user?.displayName ?: "Author"
-
                         if (noteId != null && uid != null) {
-                            db.collection("onboarding_notes").document(noteId)
-                                .update("ownerId", uid, "author_name", userName, "isTemporary", false)
-                                .addOnCompleteListener {
-                                    onLoading(false)
-                                    onSuccess(userName)
-                                }
+                            transferNote(noteId, uid) {
+                                onLoading(false)
+                                onSuccess(userName)
+                            }
                         } else {
                             onLoading(false)
                             onSuccess(userName)
                         }
                     }
-                    .addOnFailureListener { e ->
-                        onLoading(false)
-                        Toast.makeText(context, "Firebase Error: ${e.message}", Toast.LENGTH_LONG).show()
-                    }
             }
         } catch (e: Exception) {
             onLoading(false)
-            if (e !is GetCredentialCancellationException) {
+            if (e is NoCredentialException) {
+                Toast.makeText(context, "No Google accounts found on device", Toast.LENGTH_LONG).show()
+            } else if (e !is GetCredentialCancellationException) {
                 Toast.makeText(context, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
             }
         }
