@@ -1,4 +1,4 @@
-@LiberInkAPI_HostAddress = http://localhost:5241
+@LiberInkAPI_HostAddress = https://liber-ink-api.onrender.com
 
 GET {{LiberInkAPI_HostAddress}}/weatherforecast/
 Accept: application/json
