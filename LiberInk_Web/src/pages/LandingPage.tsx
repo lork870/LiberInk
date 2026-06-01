@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import myLanding_img from '../assets/Landing_img_1.jpg';
+import myLanding_img from '../assets/landing_img_1.jpg';
 import my_ic_Logo from '../assets/ic_logo.png';
 
 const LandingPage = () => {
