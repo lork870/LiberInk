@@ -77,7 +77,6 @@ fun RegistrationScreen(navController: NavController, noteId: String? = null) {
     val scale by animateFloatAsState(if (isPressed) 0.96f else 1f, label = "scale")
     val animatedOffset by animateDpAsState(if (isPressed) 4.dp else 0.dp, label = "offset")
 
-    // Ефект після успішної реєстрації
     if (isSuccess) {
         LaunchedEffect(Unit) {
             delay(2000)
@@ -298,13 +297,6 @@ fun SignInFooter(navController: NavController, theme: com.zaitsev.liberink.ui.th
         Text("Sign in", color = theme.mainInk, fontWeight = FontWeight.Bold, fontSize = 18.sp)
     }
 }
-
-/**
- * Логіка переносу нотатки з онбордингу до основного профілю
- */
-/**
- * Логіка переносу нотатки та створення профілю автора
- */
 fun transferNote(tempNoteId: String, uid: String, onComplete: () -> Unit) {
     val db = FirebaseFirestore.getInstance()
     db.collection("onboarding_notes").document(tempNoteId).get()
@@ -312,7 +304,6 @@ fun transferNote(tempNoteId: String, uid: String, onComplete: () -> Unit) {
             if (snapshot.exists()) {
                 val data = snapshot.data?.toMutableMap() ?: mutableMapOf()
 
-                // 1. ЗБЕРІГАЄМО ПРОФІЛЬ АВТОРА
                 val penName = data["author_pen_name"] ?: ""
                 val bio = data["author_bio"] ?: ""
 
@@ -320,11 +311,8 @@ fun transferNote(tempNoteId: String, uid: String, onComplete: () -> Unit) {
                     "penName" to penName,
                     "bio" to bio
                 )
-                // Записуємо в колекцію "users" за ID користувача
                 db.collection("users").document(uid).set(userData, com.google.firebase.firestore.SetOptions.merge())
 
-                // 2. ГОТУЄМО НОТАТКУ
-                // Видаляємо дані профілю з нотатки, щоб не смітити в базі
                 data.remove("author_pen_name")
                 data.remove("author_bio")
 
@@ -338,7 +326,6 @@ fun transferNote(tempNoteId: String, uid: String, onComplete: () -> Unit) {
                 data["timestamp"] = System.currentTimeMillis()
                 data["type"] = "text"
 
-                // 3. ЗБЕРІГАЄМО НОТАТКУ
                 db.collection("notes").add(data)
                     .addOnSuccessListener {
                         db.collection("onboarding_notes").document(tempNoteId).delete()

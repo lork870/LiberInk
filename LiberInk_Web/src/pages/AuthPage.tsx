@@ -34,7 +34,7 @@ const AuthPage = () => {
     if (pendingBook) {
       try {
         const bookData = JSON.parse(pendingBook);
-        const response = await fetch('http://localhost:5241/api/Books', {
+        const response = await fetch('https://liber-ink-api.onrender.com/api/Books', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

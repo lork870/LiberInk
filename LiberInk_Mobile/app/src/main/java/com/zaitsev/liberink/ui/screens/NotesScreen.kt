@@ -2,6 +2,11 @@ package com.zaitsev.liberink.ui.screens
 
 import android.util.Log
 import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -44,13 +50,32 @@ fun NotesScreen(navController: NavController) {
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
 
-    // Стани
     var isMenuExpanded by remember { mutableStateOf(false) }
     val notes = remember { mutableStateListOf<NoteItem>() }
     var isLoading by remember { mutableStateOf(true) }
     var searchQuery by remember { mutableStateOf("") } // Стан для пошуку
 
-    // Firestore Realtime Listener
+    val fabRotation by animateFloatAsState(
+        targetValue = if (isMenuExpanded) 225f else 0f,
+        animationSpec = spring(dampingRatio = 0.5f, stiffness = 300f),
+        label = "fab_rotation"
+    )
+    val fabSize by animateDpAsState(
+        targetValue = if (isMenuExpanded) 44.dp else 64.dp,
+        animationSpec = spring(dampingRatio = 0.5f, stiffness = 400f),
+        label = "fab_size"
+    )
+    val fabCorner by animateDpAsState(
+        targetValue = if (isMenuExpanded) 22.dp else 16.dp,
+        animationSpec = spring(dampingRatio = 0.5f, stiffness = 400f),
+        label = "fab_corner"
+    )
+    val fabColor by animateColorAsState(
+        targetValue = if (isMenuExpanded) Color(0xFFCC8500) else Color(0xFFF6A000), // Можеш змінити на theme.accentGold
+        animationSpec = tween(200),
+        label = "fab_color"
+    )
+
     DisposableEffect(currentUser) {
         val listenerRegistration = if (currentUser != null) {
             db.collection("notes")
@@ -78,7 +103,6 @@ fun NotesScreen(navController: NavController) {
         onDispose { listenerRegistration?.remove() }
     }
 
-    // Фільтрація нотаток за пошуковим запитом
     val filteredNotes = notes.filter {
         it.title.contains(searchQuery, ignoreCase = true) ||
                 it.content.contains(searchQuery, ignoreCase = true)
@@ -86,14 +110,13 @@ fun NotesScreen(navController: NavController) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
-            containerColor = theme.paperMain // Адаптивний фон
+            containerColor = theme.paperMain
         ) { padding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                // Додаємо робоче поле пошуку
                 NotesSearchBar(
                     query = searchQuery,
                     onQueryChange = { searchQuery = it }
@@ -134,7 +157,7 @@ fun NotesScreen(navController: NavController) {
                             ) {
                                 when (note.type) {
                                     "quote" -> NoteQuoteCard(note.title, note.content, theme)
-                                    "sketch" -> NoteSketchCard(note.title, R.drawable.paper_texture, theme)
+                                    "sketch" -> NoteSketchCard(note.title, R.drawable.paper_texture, theme) // TODO: Замінити на реальне зображення
                                     else -> NoteTextCard(note.title, note.content, theme)
                                 }
                             }
@@ -144,7 +167,6 @@ fun NotesScreen(navController: NavController) {
             }
         }
 
-        // Шар затемнення при відкритому меню
         if (isMenuExpanded) {
             Box(
                 modifier = Modifier
@@ -154,26 +176,38 @@ fun NotesScreen(navController: NavController) {
             )
         }
 
-        // FAB та меню
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 32.dp, end = 24.dp),
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalAlignment = Alignment.End
         ) {
+
             AnimatedVisibility(
                 visible = isMenuExpanded,
-                enter = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
-                exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom)
+                enter = fadeIn(tween(200)) +
+                        slideInVertically(
+                            initialOffsetY = { 60 },
+                            animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessMediumLow)
+                        ) +
+                        scaleIn(
+                            initialScale = 0.4f,
+                            transformOrigin = TransformOrigin(1f, 1f),
+                            animationSpec = spring(dampingRatio = 0.5f, stiffness = 400f)
+                        ),
+                exit = fadeOut(tween(150)) +
+                        slideOutVertically(targetOffsetY = { 60 }, animationSpec = tween(150)) +
+                        scaleOut(targetScale = 0.4f, transformOrigin = TransformOrigin(1f, 1f), animationSpec = tween(150)),
+                modifier = Modifier.padding(bottom = 16.dp)
             ) {
                 Column(
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
+                    // Можеш додати більше кнопок сюди (Sketch, Audio тощо)
                     ActionMenuItem(
                         label = "Text Note",
-                        icon = painterResource(id = R.drawable.ic_text),
+                        icon = painterResource(id = R.drawable.ic_text), // Переконайся що іконка існує
                         themeColors = theme
                     ) {
                         isMenuExpanded = false
@@ -182,24 +216,32 @@ fun NotesScreen(navController: NavController) {
                 }
             }
 
-            FloatingActionButton(
-                onClick = { isMenuExpanded = !isMenuExpanded },
-                containerColor = theme.accentGold, // Використовуємо колір теми
-                contentColor = Color.White,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.size(60.dp)
+            Box(
+                modifier = Modifier.size(64.dp),
+                contentAlignment = Alignment.TopEnd
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add",
-                    modifier = Modifier
-                        .size(32.dp)
-                        .rotate(if (isMenuExpanded) 45f else 0f)
-                )
+                Surface(
+                    onClick = { isMenuExpanded = !isMenuExpanded },
+                    shape = RoundedCornerShape(fabCorner),
+                    color = fabColor,
+                    shadowElevation = if (isMenuExpanded) 2.dp else 6.dp,
+                    modifier = Modifier.size(fabSize)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add",
+                            tint = Color.White,
+                            modifier = Modifier.rotate(fabRotation)
+                        )
+                    }
+                }
             }
         }
     }
 }
+
+// ... Інші компоненти (NotesSearchBar, ActionMenuItem, NoteTextCard, etc.) залишаються без змін ...
 
 @Composable
 fun NotesSearchBar(query: String, onQueryChange: (String) -> Unit) {

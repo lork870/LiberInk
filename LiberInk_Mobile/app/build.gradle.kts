@@ -70,6 +70,10 @@ dependencies {
 
     implementation("androidx.compose.material:material-icons-extended:1.6.0")
 
+    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation("id.zelory:compressor:3.0.1")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

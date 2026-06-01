@@ -4,36 +4,44 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.firebase.auth.FirebaseAuth
+import com.zaitsev.liberink.data.RetrofitClient
 import com.zaitsev.liberink.ui.Screen
 import com.zaitsev.liberink.ui.components.AppBottomBar
-import com.zaitsev.liberink.ui.screens.*
+import com.zaitsev.liberink.ui.screens.AuthorizationScreen
+import com.zaitsev.liberink.ui.screens.CreateLoreItemScreen
+import com.zaitsev.liberink.ui.screens.CreateNoteScreen
+import com.zaitsev.liberink.ui.screens.HomeScreen
+import com.zaitsev.liberink.ui.screens.LoreItemDetailScreen
+import com.zaitsev.liberink.ui.screens.LoreScreen
+import com.zaitsev.liberink.ui.screens.NotesScreen
+import com.zaitsev.liberink.ui.screens.OnboardingNoteScreen
+import com.zaitsev.liberink.ui.screens.OnboardingScreen
+import com.zaitsev.liberink.ui.screens.ProfileScreen
+import com.zaitsev.liberink.ui.screens.ReaderScreen
+import com.zaitsev.liberink.ui.screens.RegistrationScreen
+import com.zaitsev.liberink.ui.screens.WorldDetailScreen
 import com.zaitsev.liberink.ui.theme.LiberInkTheme
 import com.zaitsev.liberink.ui.theme.ThemeManager
-import com.google.firebase.auth.FirebaseAuth
-import androidx.lifecycle.lifecycleScope
-import com.zaitsev.liberink.data.RetrofitClient
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
 
@@ -42,7 +50,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // 1. Ініціалізуємо тему (завантажуємо збережену з SharedPreferences)
         ThemeManager.initialize(this)
 
         val auth = FirebaseAuth.getInstance()
@@ -76,12 +83,14 @@ class MainActivity : ComponentActivity() {
                         "onboarding", "authorization", "onboardingNoteScreen"
                     )
 
+                    // Приховуємо нижню панель для екранів читання, нотаток та деталей лору
                     val shouldShowBottomBar = currentRoute != null &&
                             currentRoute !in screensWithoutBottomBar &&
                             !currentRoute.startsWith("create_note") &&
                             !currentRoute.startsWith("registration") &&
-                            !currentRoute.startsWith("reader_screen")
-
+                            !currentRoute.startsWith("reader_screen") &&
+                            !currentRoute.startsWith("create_lore") &&
+                            !currentRoute.startsWith("lore_detail")
 
                     Scaffold(
                         containerColor = LiberInkTheme.colors.paperMain,
@@ -144,8 +153,8 @@ class MainActivity : ComponentActivity() {
                                 val rawTitle = backStackEntry.arguments?.getString("title") ?: "Untitled"
                                 val rawContent = backStackEntry.arguments?.getString("content") ?: ""
 
-                                val title = try { URLDecoder.decode(rawTitle, "UTF-8") } catch (e: Exception) { rawTitle }
-                                val content = try { URLDecoder.decode(rawContent, "UTF-8") } catch (e: Exception) { rawContent }
+                                val title = try { URLDecoder.decode(rawTitle, "UTF-8") } catch (_: Exception) { rawTitle }
+                                val content = try { URLDecoder.decode(rawContent, "UTF-8") } catch (_: Exception) { rawContent }
 
                                 ReaderScreen(
                                     navController = navController,
@@ -153,6 +162,27 @@ class MainActivity : ComponentActivity() {
                                     title = title,
                                     content = content
                                 )
+                            }
+
+                            composable(Screen.Lore.route) {
+                                LoreScreen(navController)
+                            }
+
+                            composable("world_detail/{worldName}") { backStackEntry ->
+                                val worldName = backStackEntry.arguments?.getString("worldName")
+                                WorldDetailScreen(navController, worldName)
+                            }
+
+                            // Нові маршрути для створення елементів лору
+                            composable("create_lore/{type}") { backStackEntry ->
+                                val type = backStackEntry.arguments?.getString("type") ?: "Locations"
+                                CreateLoreItemScreen(navController, type)
+                            }
+
+                            // Новий маршрут для детального перегляду персонажа/локації
+                            composable("lore_detail/{itemId}") { backStackEntry ->
+                                val itemId = backStackEntry.arguments?.getString("itemId") ?: ""
+                                LoreItemDetailScreen(navController, itemId)
                             }
 
                             composable(Screen.Notes.route) { NotesScreen(navController) }
@@ -169,8 +199,8 @@ class MainActivity : ComponentActivity() {
                                 val rawTitle = backStackEntry.arguments?.getString("title") ?: ""
                                 val rawContent = backStackEntry.arguments?.getString("content") ?: ""
 
-                                val title = try { URLDecoder.decode(rawTitle, "UTF-8") } catch (e: Exception) { rawTitle }
-                                val content = try { URLDecoder.decode(rawContent, "UTF-8") } catch (e: Exception) { rawContent }
+                                val title = try { URLDecoder.decode(rawTitle, "UTF-8") } catch (_: Exception) { rawTitle }
+                                val content = try { URLDecoder.decode(rawContent, "UTF-8") } catch (_: Exception) { rawContent }
 
                                 CreateNoteScreen(
                                     navController = navController,
@@ -180,53 +210,10 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
 
-                            composable(Screen.Lore.route) { PlaceholderScreen("Lore & Worldbuilding") }
                             composable(Screen.Profile.route) { ProfileScreen(navController) }
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun PlaceholderScreen(name: String, isLoading: Boolean = false) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = LiberInkTheme.colors.paperMain
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = name,
-                color = LiberInkTheme.colors.mainInk,
-                style = MaterialTheme.typography.displayLarge,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = if (isLoading) "Loading data..." else "is under development",
-                color = LiberInkTheme.colors.secondaryInk,
-                style = MaterialTheme.typography.bodyLarge,
-                fontSize = 16.sp
-            )
-
-            if (isLoading) {
-                Spacer(modifier = Modifier.height(24.dp))
-                CircularProgressIndicator(
-                    color = LiberInkTheme.colors.accentGold,
-                    strokeWidth = 3.dp,
-                    modifier = Modifier.size(40.dp)
-                )
             }
         }
     }

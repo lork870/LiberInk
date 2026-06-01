@@ -258,7 +258,7 @@ const EditorPage = () => {
   const fetchStructure = useCallback(async () => {
     if (!id) return;
     try {
-      const response = await fetch(`http://localhost:5241/api/Books/structure/${id}`);
+      const response = await fetch(`https://liber-ink-api.onrender.com/api/Books/structure/${id}`);
       if (response.ok) {
         const data = await response.json();
         setStructure(data);
@@ -273,8 +273,8 @@ const EditorPage = () => {
     setSaveStatus('saving');
     try {
       const url = selectedElementId 
-        ? `http://localhost:5241/api/Books/elements/${selectedElementId}`
-        : `http://localhost:5241/api/Books/${id}`;
+        ? `https://liber-ink-api.onrender.com/api/Books/elements/${selectedElementId}`
+        : `https://liber-ink-api.onrender.com/api/Books/${id}`;
 
       const bodyData = selectedElementId ? {
         id: selectedElementId,
@@ -369,7 +369,7 @@ const EditorPage = () => {
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const response = await fetch(`http://localhost:5241/api/Books/${id}`);
+        const response = await fetch(`https://liber-ink-api.onrender.com/api/Books/${id}`);
         if (!response.ok) throw new Error("Книгу не знайдено");
         const data = await response.json();
         setBook(data);
@@ -434,7 +434,7 @@ const EditorPage = () => {
     if (type === 'Part') return; 
     setSelectedElementId(elementId);
     try {
-      const response = await fetch(`http://localhost:5241/api/Books/elements/${elementId}`);
+      const response = await fetch(`https://liber-ink-api.onrender.com/api/Books/elements/${elementId}`);
       if (response.ok) {
         const data = await response.json();
         editor?.commands.setContent(data.content || '<p></p>');
@@ -462,7 +462,7 @@ const EditorPage = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:5241/api/Books/elements', {
+      const response = await fetch('https://liber-ink-api.onrender.com/api/Books/elements', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newElement),
@@ -496,7 +496,7 @@ const EditorPage = () => {
     const newParentId = overId === 'root-drop-zone' ? null : parseInt(overId.toString());
 
     try {
-      await fetch(`http://localhost:5241/api/Books/elements/${draggedId}/move`, {
+      await fetch(`https://liber-ink-api.onrender.com/api/Books/elements/${draggedId}/move`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newParentId, newOrder: 0 }),
@@ -507,7 +507,7 @@ const EditorPage = () => {
 
   const handleMoveToRoot = async (elementId: number) => {
     try {
-      await fetch(`http://localhost:5241/api/Books/elements/${elementId}/move`, {
+      await fetch(`https://liber-ink-api.onrender.com/api/Books/elements/${elementId}/move`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newParentId: null, newOrder: 0 }),
@@ -522,7 +522,7 @@ const EditorPage = () => {
     if (!window.confirm(`Ви впевнені, що хочете видалити "${title}"?`)) return;
 
     try {
-      const response = await fetch(`http://localhost:5241/api/Books/elements/${elementId}`, {
+      const response = await fetch(`https://liber-ink-api.onrender.com/api/Books/elements/${elementId}`, {
         method: 'DELETE',
       });
 

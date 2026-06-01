@@ -43,7 +43,7 @@ const LibraryPage = () => {
 
   const fetchBooks = async (uid: string) => {
     try {
-      const response = await fetch(`http://localhost:5241/api/Books/user/${uid}`);
+      const response = await fetch(`https://liber-ink-api.onrender.com/api/Books/user/${uid}`);
       if (!response.ok) throw new Error('Помилка завантаження');
       const data = await response.json();
       setBooks(data);
@@ -64,7 +64,7 @@ const LibraryPage = () => {
     const user = auth.currentUser;
     if (!user || !newBook.title) return;
     try {
-      const response = await fetch('http://localhost:5241/api/Books', {
+      const response = await fetch('https://liber-ink-api.onrender.com/api/Books', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -90,7 +90,7 @@ const LibraryPage = () => {
     e.stopPropagation();
     if (!window.confirm("Ви впевнені, що хочете видалити цей проект?")) return;
     try {
-      const response = await fetch(`http://localhost:5241/api/Books/${id}`, { method: 'DELETE' });
+      const response = await fetch(`https://liber-ink-api.onrender.com/api/Books/${id}`, { method: 'DELETE' });
       if (response.ok) setBooks(prev => prev.filter(b => b.id !== id));
     } catch (error) {
       console.error("Error deleting book:", error);

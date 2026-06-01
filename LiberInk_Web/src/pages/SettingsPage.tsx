@@ -44,7 +44,7 @@ const SettingsPage = () => {
 
   const fetchUserProfile = async (user: any) => {
     try {
-      const response = await fetch(`http://localhost:5241/api/Users/${user.uid}`);
+      const response = await fetch(`https://liber-ink-api.onrender.com/api/Users/${user.uid}`);
       let apiData = null;
       if (response.ok) {
         apiData = await response.json();
