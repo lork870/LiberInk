@@ -214,8 +214,9 @@ const EditorPage = () => {
   const [structure, setStructure] = useState<BookElement[]>([]);
   const [selectedElementId, setSelectedElementId] = useState<number | null>(null);
   const [isAdding, setIsAdding] = useState(false);
-
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
+  const [isSidebarOpen, setIsSidebarOpen] = useState(typeof window !== 'undefined' ? window.innerWidth > 768 : true);
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false); // Стан для правої панелі
   const [activeItem, setActiveItem] = useState<BookElement | null>(null);
 
   // Стани редактора та UI
@@ -433,6 +434,7 @@ const EditorPage = () => {
   const handleElementClick = async (elementId: number, type: string) => {
     if (type === 'Part') return; 
     setSelectedElementId(elementId);
+    if (window.innerWidth < 768) setIsSidebarOpen(false);
     try {
       const response = await fetch(`https://liber-ink-api.onrender.com/api/Books/elements/${elementId}`);
       if (response.ok) {
@@ -583,6 +585,7 @@ const EditorPage = () => {
     setNotes(prev => [...prev, newNote]);
     setActiveNoteId(noteId);
     setRightSidebarTab('Notes'); // Автоматично відкриваємо вкладку нотаток
+    setIsRightSidebarOpen(true);
 
     editor.commands.blur();
 
@@ -632,27 +635,27 @@ const EditorPage = () => {
   // --- 6. JSX РЕНДЕР ---
   return (
     <div className="flex flex-col flex-1 h-full overflow-hidden bg-[#F9F5EB]">
-      <div className="flex flex-1 overflow-hidden pt-0">
+      <div className="flex flex-1 overflow-hidden pt-0 relative w-full">
 
         {!isSidebarOpen && (
         <button 
           onClick={() => setIsSidebarOpen(true)}
-          className="absolute left-4 top-6 z-[60] bg-[#FFFCF5] p-2 rounded-full shadow-lg border border-[#E8E2D2] text-[#4A0E0E] hover:bg-[#F3EAD3] transition-all"
+          className="absolute left-2 md:left-4 top-2 md:top-6 z-[60] bg-[#FFFCF5] p-2 md:p-2.5 rounded-full shadow-lg border border-[#E8E2D2] text-[#4A0E0E] hover:bg-[#F3EAD3] transition-all"
         >
           <MenuOpen sx={{ fontSize: 24 }} />
         </button>
       )}
         
-        {/* ЛІВА ПАНЕЛЬ */}
+        {/* ЛІВА ПАНЕЛЬ (Адаптовано як Overlay для мобільних) */}
         <aside 
-          className="bg-[#FFFCF5] rounded-r-[32px] border-r border-[#E8E2D2]/50 flex flex-col shrink-0 mb-0 shadow-sm overflow-hidden h-full transition-all duration-500 ease-in-out z-50"
+          className="absolute md:relative bg-[#FFFCF5] md:rounded-r-[32px] border-r border-[#E8E2D2]/50 flex flex-col shrink-0 mb-0 shadow-2xl md:shadow-sm overflow-hidden h-full transition-all duration-500 ease-in-out z-[100] md:z-50"
           style={{ 
-            width: isSidebarOpen ? '240px' : '0px', 
+            width: isSidebarOpen ? (typeof window !== 'undefined' && window.innerWidth < 768 ? '100%' : '240px') : '0px', 
             opacity: isSidebarOpen ? 1 : 0,
             pointerEvents: isSidebarOpen ? 'auto' : 'none'
           }}
         >
-          <div className="p-5 flex flex-col h-full w-[240px]">
+          <div className="p-4 md:p-5 flex flex-col h-full w-full md:w-[240px]">
             <div className="flex items-center justify-between mb-6 px-1">
               <h3 className="font-serif text-xl font-bold text-[#433D33]">Book Map</h3>
               <button 
@@ -757,10 +760,11 @@ const EditorPage = () => {
         {/* ЦЕНТРАЛЬНА РОБОЧА ЗОНА */}
         <main
           ref={editorContainerRef} 
-          className="flex-1 overflow-y-auto flex flex-col items-center scrollbar-hide bg-[#EAD9C6]/20 relative pt-4"
+          className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center scrollbar-hide bg-[#EAD9C6]/20 relative pt-12 md:pt-4 w-full"
         >
-          {/* TOOLBAR */}
-          <div className="sticky top-1 bg-[#FFFCF5] backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl border border-[#E8E2D2]/50 flex items-center gap-1 mb-10 z-50 transition-all">
+          {/* TOOLBAR (Адаптовано: горизонтальний скрол на мобільних) */}
+          <div className="sticky top-1 bg-[#FFFCF5] backdrop-blur-md px-2 md:px-4 py-6
+           rounded-2xl shadow-xl border border-[#E8E2D2]/50 flex items-center gap-1 md:gap-1 mb-6 md:mb-10 z-50 transition-all overflow-x-auto w-[95%] sm:w-auto max-w-full mx-auto scrollbar-hide">
             
             <div className="relative" ref={fontDropdownRef}>
               <button 
@@ -1005,13 +1009,18 @@ const EditorPage = () => {
           </div>
 
           <div 
-            className="transition-transform duration-100 origin-top pb-40 flex flex-col items-center gap-10"
-            style={{ transform: `scale(${zoom / 100})` }}
+            className="transition-transform duration-100 origin-top pb-40 flex flex-col items-center gap-10 w-full px-2 sm:px-0"
+            style={{ transform: `scale(${typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : zoom / 100})` }}
           >
-            <div className="relative shadow-2xl border border-gray-200 bg-white flex transition-all duration-300 ease-in-out"
-                 style={{ width: `${PAGE_FORMATS[currentFormat].width}px`, minHeight: `${PAGE_FORMATS[currentFormat].height}px` }}>
+            <div className="relative shadow-2xl border border-gray-200 bg-white flex transition-all duration-300 ease-in-out w-full md:w-auto overflow-hidden"
+                 style={{ 
+                   width: typeof window !== 'undefined' && window.innerWidth < 768 ? '100%' : `${PAGE_FORMATS[currentFormat].width}px`, 
+                   maxWidth: `${PAGE_FORMATS[currentFormat].width}px`,
+                   minHeight: `${PAGE_FORMATS[currentFormat].height}px` 
+                 }}>
               
-              <div className="w-16 shrink-0 border-r border-[#E8E2D2] bg-[#fdfcf9] relative overflow-hidden pointer-events-none">
+              {/* Приховуємо лінійку сторінок на телефоні */}
+              <div className="hidden sm:block w-16 shrink-0 border-r border-[#E8E2D2] bg-[#fdfcf9] relative overflow-hidden pointer-events-none">
                 {Array.from({ length: pageCount }).map((_, i) => (
                   <div 
                     key={i} 
@@ -1094,9 +1103,40 @@ const EditorPage = () => {
         </main>
 
         {/* ПРАВА ПАНЕЛЬ */}
-        <aside className="w-80 bg-[#FFFCF5] border-l border-[#E8E2D2]/50 flex flex-col shrink-0 mb-0 shadow-sm overflow-hidden h-full z-50 rounded-tl-[40px]">
-          <div className="flex border-b border-[#E8E2D2]/50">
-            <button onClick={() => setRightSidebarTab('Notes')} className={`flex-1 py-4 text-sm font-bold relative ${rightSidebarTab === 'Notes' ? 'text-[#4A0E0E]' : 'text-gray-400'}`}>
+        {/* Кнопка для виклику панелі нотаток на мобільному */}
+        {!isRightSidebarOpen && (
+          <button 
+            onClick={() => setIsRightSidebarOpen(true)}
+            className="absolute lg:hidden right-2 md:right-4 top-2 md:top-6 z-[60] bg-[#FFFCF5] p-2 md:p-2.5 rounded-full shadow-lg border border-[#E8E2D2] text-[#4A0E0E] hover:bg-[#F3EAD3] transition-all"
+          >
+            <PushPin sx={{ fontSize: 24 }} />
+          </button>
+        )}
+
+        {/* Затемнення фону при відкритій панелі на мобільному */}
+        {isRightSidebarOpen && (
+          <div 
+            className="absolute inset-0 bg-[#433D33]/20 backdrop-blur-sm z-[80] lg:hidden"
+            onClick={() => setIsRightSidebarOpen(false)}
+          />
+        )}
+
+        {/* ПРАВА ПАНЕЛЬ */}
+        <aside 
+          className={`absolute lg:relative right-0 top-0 h-full w-[85%] sm:w-80 bg-[#FFFCF5] lg:border-l border-[#E8E2D2]/50 flex flex-col shrink-0 mb-0 shadow-2xl lg:shadow-sm overflow-hidden z-[90] lg:z-50 lg:rounded-tl-[40px] transition-transform duration-300 ease-in-out ${
+            isRightSidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
+          }`}
+        >
+          <div className="flex border-b border-[#E8E2D2]/50 relative">
+            {/* Кнопка закриття для мобільного */}
+            <button 
+              onClick={() => setIsRightSidebarOpen(false)}
+              className="lg:hidden absolute left-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-[#4A0E0E] z-10"
+            >
+              <ChevronLeft sx={{ fontSize: 24 }} />
+            </button>
+
+            <button onClick={() => setRightSidebarTab('Notes')} className={`flex-1 py-4 ml-8 lg:ml-0 text-sm font-bold relative ${rightSidebarTab === 'Notes' ? 'text-[#4A0E0E]' : 'text-gray-400'}`}>
               Notes {rightSidebarTab === 'Notes' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#4A0E0E] rounded-t-full" />}
             </button>
             <button onClick={() => setRightSidebarTab('Drafts')} className={`flex-1 py-4 text-sm font-bold relative ${rightSidebarTab === 'Drafts' ? 'text-[#4A0E0E]' : 'text-gray-400'}`}>
@@ -1180,7 +1220,7 @@ const EditorPage = () => {
       </div>
 
       {/* ФУТЕР */}
-      <footer className="h-8 bg-[#F9F5EB] border-t border-[#E8E2D2] flex items-center justify-between px-10 shrink-0 z-20 font-sans text-[11px] font-bold text-[#433D33]">
+      <footer className="h-10 md:h-8 bg-[#F9F5EB] border-t border-[#E8E2D2] flex items-center justify-between px-4 md:px-10 shrink-0 z-20 font-sans text-[9px] md:text-[11px] font-bold text-[#433D33] overflow-x-auto whitespace-nowrap scrollbar-hide">
         <div className="flex gap-10">
            <span>PAGES: {pageCount}</span>
            <span>WORDS: {wordCount}</span>
@@ -1204,7 +1244,7 @@ const EditorPage = () => {
           )}
         </div>
 
-        <div className="flex items-center gap-4 w-64">
+        <div className="hidden md:flex items-center gap-4 w-64 shrink-0 ml-auto">
            <input 
               type="range" min="30" max="200" value={zoom} 
               onChange={(e) => setZoom(Number(e.target.value))} 

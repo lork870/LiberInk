@@ -1,3 +1,18 @@
+:root {
+  --accent: #2563eb;
+  --accent-bg: #eff6ff;
+  --accent-border: #bfdbfe;
+  --text-h: #1f2937;
+  --border: #e5e7eb;
+  --social-bg: #f9fafb;
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+* {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
@@ -19,10 +34,8 @@
 
 .hero {
   position: relative;
-
-  .base,
-  .framework,
-  .vite {
+  
+  .base, .framework, .vite {
     inset-inline: 0;
     margin: 0 auto;
   }
@@ -33,8 +46,7 @@
     z-index: 0;
   }
 
-  .framework,
-  .vite {
+  .framework, .vite {
     position: absolute;
   }
 
@@ -42,8 +54,7 @@
     z-index: 1;
     top: 34px;
     height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg) scale(1.4);
   }
 
   .vite {
@@ -51,8 +62,13 @@
     top: 107px;
     height: 26px;
     width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg) scale(0.8);
+  }
+
+  /* Адаптація героя для мобільних */
+  @media (max-width: 768px) {
+    .framework { transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg) scale(1.0); }
+    .vite { transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg) scale(0.6); }
   }
 }
 
@@ -111,9 +127,7 @@
   gap: 8px;
   margin: 32px 0 0;
 
-  .logo {
-    height: 18px;
-  }
+  .logo { height: 18px; }
 
   a {
     color: var(--text-h);
@@ -127,13 +141,8 @@
     text-decoration: none;
     transition: box-shadow 0.3s;
 
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
+    &:hover { box-shadow: var(--shadow); }
+    .button-icon { height: 18px; width: 18px; }
   }
 
   @media (max-width: 1024px) {
@@ -141,14 +150,13 @@
     flex-wrap: wrap;
     justify-content: center;
 
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
+    li { flex: 1 1 calc(50% - 8px); }
 
     a {
       width: 100%;
       justify-content: center;
       box-sizing: border-box;
+      padding: 10px; /* Трохи більший клікабельний розмір */
     }
   }
 }
@@ -165,42 +173,29 @@
   position: relative;
   width: 100%;
 
-  &::before,
-  &::after {
+  &::before, &::after {
     content: '';
     position: absolute;
     top: -4.5px;
     border: 5px solid transparent;
   }
-
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
-  }
+  &::before { left: 0; border-left-color: var(--border); }
+  &::after { right: 0; border-right-color: var(--border); }
 }
 
 /* Стилі для редактора Tiptap */
-.ProseMirror ul {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  margin: 1rem 0;
-}
+.ProseMirror ul { list-style-type: disc; padding-left: 1.5rem; margin: 1rem 0; }
+.ProseMirror ol { list-style-type: decimal; padding-left: 1.5rem; margin: 1rem 0; }
+.ProseMirror li { margin-bottom: 0.5rem; }
+.ProseMirror ul, .ProseMirror ol { text-align: left; }
 
-.ProseMirror ol {
-  list-style-type: decimal;
-  padding-left: 1.5rem;
-  margin: 1rem 0;
-}
-
-.ProseMirror li {
-  margin-bottom: 0.5rem;
-}
-
-/* Щоб списки не зливалися з justify вирівнюванням */
-.ProseMirror ul, .ProseMirror ol {
-  text-align: left;
+.material-symbols-rounded {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
 }

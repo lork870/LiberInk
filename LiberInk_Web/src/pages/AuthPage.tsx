@@ -93,10 +93,9 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F3E9] flex flex-col items-center justify-start p-2 font-serif text-[#4A0404] overflow-hidden relative">
+    <div className="min-h-screen bg-[#F6F3E9] flex flex-col items-center justify-start p-4 md:p-2 font-serif text-[#4A0404] overflow-hidden relative">
       
-      {/* Header Section */}
-      <div className="w-full max-w-[380px] h-24 flex flex-col items-center justify-between mt-12 mb-2 animate-in fade-in duration-700">
+      <div className="w-full max-w-[380px] h-24 flex flex-col items-center justify-between mt-8 md:mt-12 mb-2 animate-in fade-in duration-700">
         <div className="flex items-center gap-2">
           <img src={my_ic_Logo} alt="Logo" className="h-8 w-auto" />
           <span className="text-2xl font-bold">LiberInk</span>
@@ -112,10 +111,9 @@ const AuthPage = () => {
         </div>
       </div>
 
-      {/* Main Card Container */}
       <div className="w-full max-w-[380px] flex flex-col items-center">
         <div 
-          className={`w-full rounded-[32px] shadow-[0_15px_40px_rgba(74,4,4,0.12)] px-8 py-8 border border-[#4A0404]/5 overflow-hidden relative transition-all duration-500 ease-in-out ${isLogin ? 'max-h-[500px]' : 'max-h-[750px]'}`}
+          className={`w-full rounded-[32px] shadow-[0_15px_40px_rgba(74,4,4,0.12)] px-6 sm:px-8 py-8 border border-[#4A0404]/5 overflow-hidden relative transition-all duration-500 ease-in-out ${isLogin ? 'max-h-[500px]' : 'max-h-[850px]'}`}
         >
           
           <div 
@@ -150,7 +148,6 @@ const AuthPage = () => {
                 </div>
               </div>
 
-              {/* Поле: Email */}
               <div className="relative mb-4 mt-2">
                 <label className="absolute top-0 left-4 -translate-y-1/2 z-20 px-1.5 text-[12px] font-medium text-[#4A0404]/80 bg-white/70 rounded-sm"
                   style={{ backgroundImage: `url(${bgTexture})`, backgroundSize: '800%', backgroundPosition: 'center' }}>
@@ -167,7 +164,6 @@ const AuthPage = () => {
                 />
               </div>
 
-              {/* Поле: Password */}
               <div className="relative mb-4 mt-2">
                 <label className="absolute top-0 left-4 -translate-y-1/2 z-20 px-1.5 text-[12px] font-medium text-[#4A0404]/80 bg-white/70 rounded-sm"
                   style={{ backgroundImage: `url(${bgTexture})`, backgroundSize: '800%', backgroundPosition: 'center' }}>
@@ -185,7 +181,6 @@ const AuthPage = () => {
                 />
               </div>
 
-              {/* Поле: RePassword */}
               <div 
                 className={`transition-all duration-500 ease-in-out overflow-hidden ${isLogin ? 'max-h-0 opacity-0 mb-0 pt-0' : 'max-h-[100px] opacity-100 mb-4 pt-3'}`}
               >
