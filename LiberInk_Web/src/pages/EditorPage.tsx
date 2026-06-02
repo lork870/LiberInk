@@ -240,6 +240,8 @@ const EditorPage = () => {
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [, setUpdateTick] = useState(0);
 
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
   // Стани дропдаунів
   const [showSizeDropdown, setShowSizeDropdown] = useState(false);
   const [showFontDropdown, setShowFontDropdown] = useState(false);
@@ -643,8 +645,6 @@ const EditorPage = () => {
     // вашому розширенні NoteMark була команда unsetNote(). 
     // Якщо її там немає, то візуальне виділення тексту залишиться.
   };
-
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   // --- 6. JSX РЕНДЕР ---
   return (
