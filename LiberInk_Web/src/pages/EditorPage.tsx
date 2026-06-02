@@ -763,9 +763,8 @@ const EditorPage = () => {
           className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center scrollbar-hide bg-[#EAD9C6]/20 relative pt-12 md:pt-4 w-full"
         >
           {/* TOOLBAR (Адаптовано: горизонтальний скрол на мобільних) */}
-          <div className="sticky top-1 bg-[#FFFCF5] backdrop-blur-md px-2 md:px-4 py-6
-           rounded-2xl shadow-xl border border-[#E8E2D2]/50 flex items-center gap-1 md:gap-1 mb-6 md:mb-10 z-50 transition-all overflow-x-auto w-[95%] sm:w-auto max-w-full mx-auto scrollbar-hide">
-            
+          <div className="sticky top-1 bg-[#FFFCF5] backdrop-blur-md px-2 md:px-4 py-2 md:py-3 rounded-2xl shadow-xl border border-[#E8E2D2]/50 flex flex-wrap justify-center items-center gap-1 md:gap-2 mb-6 md:mb-10 z-[120] transition-all w-[95%] sm:w-auto max-w-full mx-auto">
+        
             <div className="relative" ref={fontDropdownRef}>
               <button 
                 onClick={() => {
