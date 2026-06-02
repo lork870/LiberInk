@@ -201,6 +201,18 @@ const WordSizeIcon = () => (
   </svg>
 );
 
+const ToolbarDropdownGroup = ({ activeIcon, children, isOpen, onClick }: any) => (
+  <div className="relative">
+    <button onClick={onClick} className="p-2 hover:bg-[#F3EAD3] rounded-lg transition-all text-gray-500 hover:text-[#4A0E0E]">
+      {activeIcon}
+    </button>
+    {isOpen && (
+      <div className="absolute top-full left-0 mt-2 bg-white p-2 rounded-xl shadow-2xl border border-[#E8E2D2] flex gap-1 z-[150] animate-in fade-in zoom-in duration-200">
+        {children}
+      </div>
+    )}
+  </div>
+);
 
 // --- 3. ГОЛОВНИЙ КОМПОНЕНТ РЕДАКТОРА ---
 const EditorPage = () => {
@@ -632,6 +644,8 @@ const EditorPage = () => {
     // Якщо її там немає, то візуальне виділення тексту залишиться.
   };
 
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
   // --- 6. JSX РЕНДЕР ---
   return (
     <div className="flex flex-col flex-1 h-full overflow-hidden bg-[#F9F5EB]">
@@ -853,10 +867,27 @@ const EditorPage = () => {
 
             <div className="w-px h-6 bg-gray-200 mx-1" />
 
-            <ToolbarButton active={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()} IconComponent={FormatBold} />
-            <ToolbarButton active={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()} IconComponent={FormatItalic} />
-            <ToolbarButton active={editor.isActive('underline')} onClick={() => editor.chain().focus().toggleUnderline().run()} IconComponent={FormatUnderlined} />
-            <ToolbarButton active={editor.isActive('strike')} onClick={() => editor.chain().focus().toggleStrike().run()} IconComponent={StrikethroughS} />
+            {/* Група Вирівнювання */}
+            <ToolbarDropdownGroup 
+              isOpen={activeDropdown === 'align'}
+              onClick={() => setActiveDropdown(activeDropdown === 'align' ? null : 'align')}
+              activeIcon={<FormatAlignLeft />}
+            >
+              <ToolbarButton active={editor.isActive({ textAlign: 'left' })} onClick={() => { editor.chain().focus().setTextAlign('left').run(); setActiveDropdown(null); }} IconComponent={FormatAlignLeft} />
+              <ToolbarButton active={editor.isActive({ textAlign: 'center' })} onClick={() => { editor.chain().focus().setTextAlign('center').run(); setActiveDropdown(null); }} IconComponent={FormatAlignCenter} />
+              <ToolbarButton active={editor.isActive({ textAlign: 'right' })} onClick={() => { editor.chain().focus().setTextAlign('right').run(); setActiveDropdown(null); }} IconComponent={FormatAlignRight} />
+              <ToolbarButton active={editor.isActive({ textAlign: 'justify' })} onClick={() => { editor.chain().focus().setTextAlign('justify').run(); setActiveDropdown(null); }} IconComponent={FormatAlignJustify} />
+            </ToolbarDropdownGroup>
+
+            {/* Група Списки */}
+            <ToolbarDropdownGroup 
+              isOpen={activeDropdown === 'list'}
+              onClick={() => setActiveDropdown(activeDropdown === 'list' ? null : 'list')}
+              activeIcon={<FormatListBulleted />}
+            >
+              <ToolbarButton active={editor.isActive('bulletList')} onClick={() => { editor.chain().focus().toggleBulletList().run(); setActiveDropdown(null); }} IconComponent={FormatListBulleted} />
+              <ToolbarButton active={editor.isActive('orderedList')} onClick={() => { editor.chain().focus().toggleOrderedList().run(); setActiveDropdown(null); }} IconComponent={FormatListNumbered} />
+            </ToolbarDropdownGroup>
 
             <div className="relative" ref={colorDropdownRef}>
               <div className="flex items-center rounded-xl border border-transparent hover:border-[#E8E2D2] transition-all">
