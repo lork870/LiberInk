@@ -20,7 +20,7 @@ const LandingPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <main className="flex-grow flex flex-col lg:flex-row items-center justify-center px-6 md:px-20 pt-24 pb-10 gap-8 md:gap-12 w-full">
+      <main className="flex-grow flex flex-col lg:flex-row items-center justify-center px-6 md:px-20 pt-12 md:pt-24 pb-10 gap-8 md:gap-12 w-full">
         <div className="max-w-xl text-center lg:text-left">
           <h1 className="text-5xl md:text-7xl font-normal leading-[1.1] mb-6 md:mb-8 text-[#4A0404]">
             Your Story,<br /> Your Sanctuary
