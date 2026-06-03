@@ -3,7 +3,7 @@ import myLanding_img from '../assets/landing_img_1.jpg';
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-[#F6F3E9] font-serif text-[#4A0404] overflow-x-hidden">
+    <div className="h-screen bg-[#F6F3E9] font-serif text-[#4A0404] overflow-x-hidden">
       
       {/* Навігаційна панель: тепер фіксована */}
       <nav className="fixed top-0 left-0 w-full flex justify-between items-center px-6 md:px-12 py-4 border-b border-[#4A0404]/10 z-50 bg-[#F6F3E9]">
