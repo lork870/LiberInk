@@ -29,7 +29,7 @@ const SidebarLayout = () => {
         {!isEditorPage ? (
           <>
             <div className="flex items-center gap-2 md:gap-3 cursor-pointer" onClick={() => navigate('/library')}>
-              <img src="/ic_logo.png" alt="Logo" />
+              <img src="/ic_logo.png" alt="Logo" className="h-8 w-auto"/>
               <span className="text-xl md:text-2xl font-bold font-serif text-[#4A0E0E]">LiberInk</span>
             </div>
             <div className="flex items-center gap-2 md:gap-4">

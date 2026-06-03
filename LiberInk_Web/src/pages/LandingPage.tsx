@@ -7,7 +7,7 @@ const LandingPage = () => {
       {/* Навігаційна панель */}
       <nav className="flex justify-between items-center px-6 md:px-12 py-4 border-b border-[#4A0404]/10 sticky top-0 z-50 bg-[#F6F3E9]">
         <div className="flex items-center gap-2 md:gap-3 cursor-pointer">
-          <img src="/ic_logo.png" alt="Logo" />
+          <img src="/ic_logo.png" alt="Logo" className="h-8 w-auto"/>
           <span className="text-xl md:text-2xl font-bold">LiberInk</span>
         </div>
         <div className="flex items-center gap-4 md:gap-8 text-sm md:text-base font-sans font-normal">

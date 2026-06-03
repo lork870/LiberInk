@@ -96,7 +96,7 @@ const AuthPage = () => {
       
       <div className="w-full max-w-[380px] h-24 flex flex-col items-center justify-between mt-8 md:mt-12 mb-2 animate-in fade-in duration-700">
         <div className="flex items-center gap-2">
-          <img src="/ic_logo.png" alt="Logo" />
+          <img src="/ic_logo.png" alt="Logo" className="h-8 w-auto"/>
           <span className="text-2xl font-bold">LiberInk</span>
         </div>
         
