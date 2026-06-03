@@ -9,7 +9,6 @@ import {
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { GoogleIcon } from '../components/GoogleIcon'; 
-import my_ic_Logo from '../assets/ic_logo.png';
 import bgTexture from '../assets/paper_texture.jpg'; 
 
 const AuthPage = () => {
@@ -97,7 +96,7 @@ const AuthPage = () => {
       
       <div className="w-full max-w-[380px] h-24 flex flex-col items-center justify-between mt-8 md:mt-12 mb-2 animate-in fade-in duration-700">
         <div className="flex items-center gap-2">
-          <img src={my_ic_Logo} alt="Logo" className="h-8 w-auto" />
+          <img src="/ic_logo.png" alt="Logo" />
           <span className="text-2xl font-bold">LiberInk</span>
         </div>
         
