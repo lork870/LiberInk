@@ -5,7 +5,8 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-[#F6F3E9] font-serif text-[#4A0404] overflow-x-hidden">
       
-      <nav className="flex justify-between items-center px-6 md:px-12 py-4 border-b border-[#4A0404]/10 sticky top-0 z-50 bg-[#F6F3E9]">
+      {/* Навігаційна панель: тепер фіксована */}
+      <nav className="fixed top-0 left-0 w-full flex justify-between items-center px-6 md:px-12 py-4 border-b border-[#4A0404]/10 z-50 bg-[#F6F3E9]">
         <div className="flex items-center gap-2 md:gap-3 cursor-pointer">
           <img src="/ic_logo.png" alt="Logo" className="h-8 w-auto"/>
           <span className="text-xl md:text-2xl font-bold">LiberInk</span>
@@ -19,8 +20,8 @@ const LandingPage = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <main className="flex flex-col lg:flex-row items-center justify-between px-6 md:px-20 mt-10 md:mt-20 gap-8 md:gap-12 pb-10 md:pb-20">
+      {/* Hero Section:*/}
+      <main className="pt-18 md:pt-24 flex flex-col lg:flex-row items-center justify-between px-6 md:px-20 mt-10 md:mt-20 gap-8 md:gap-12 pb-10 md:pb-20">
         <div className="max-w-xl text-center lg:text-left">
           <h1 className="text-5xl md:text-7xl font-normal leading-[1.1] mb-6 md:mb-8 text-[#4A0404]">
             Your Story,<br /> Your Sanctuary
