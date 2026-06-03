@@ -28,7 +28,7 @@ const LandingPage = () => {
           <p className="text-base md:text-lg leading-relaxed text-[#1A1A1A]/70 mb-8 md:mb-10 font-sans font-normal">
             LiberInk is a distraction-free writing environment that helps you focus on what matters—your words. Craft, revise, and perfect your stories with powerful version control.
           </p>
-          <Link to="/onboarding" className="bg-[#4A0404] text-[#F6F3E9] px-8 py-3 rounded-full text-lg font-normal hover:bg-[#320a0a] transition-all shadow-md inline-block">
+          <Link to="/onboarding" className="font-[Manrope] bg-[#4A0404] text-[#F6F3E9] px-8 py-3 rounded-full text-lg font-normal hover:bg-[#320a0a] transition-all shadow-md inline-block">
             Start Your Story Now
           </Link>
         </div>
