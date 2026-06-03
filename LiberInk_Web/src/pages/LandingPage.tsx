@@ -3,8 +3,8 @@ import myLanding_img from '../assets/landing_img_1.jpg';
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-[#F6F3E9] font-serif text-[#4A0404]">
-      {/* Навігаційна панель */}
+    <div className="min-h-screen bg-[#F6F3E9] font-serif text-[#4A0404] overflow-x-hidden">
+      
       <nav className="flex justify-between items-center px-6 md:px-12 py-4 border-b border-[#4A0404]/10 sticky top-0 z-50 bg-[#F6F3E9]">
         <div className="flex items-center gap-2 md:gap-3 cursor-pointer">
           <img src="/ic_logo.png" alt="Logo" className="h-8 w-auto"/>
@@ -33,9 +33,8 @@ const LandingPage = () => {
           </Link>
         </div>
 
-        {/* Зображення */}
         <div className="relative w-full max-w-[624px]">
-          <div className="w-full h-[250px] md:h-[400px] rounded-[32px] md:rounded-[40px] overflow-hidden shadow-xl border border-white/10">
+          <div className="relative w-full h-[250px] md:h-[400px] rounded-[32px] md:rounded-[40px] overflow-hidden shadow-xl border border-white/10">
             <img src={myLanding_img} alt="Writing" className="w-full h-full object-cover" />
           </div>
           <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-orange-200/10 blur-[100px] rounded-full"></div>
