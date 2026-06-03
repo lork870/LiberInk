@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import myLanding_img from '../assets/landing_img_1.jpg';
-import my_ic_Logo from '../assets/ic_logo.png';
 
 const LandingPage = () => {
   return (
@@ -8,7 +7,7 @@ const LandingPage = () => {
       {/* Навігаційна панель */}
       <nav className="flex justify-between items-center px-6 md:px-12 py-4 border-b border-[#4A0404]/10 sticky top-0 z-50 bg-[#F6F3E9]">
         <div className="flex items-center gap-2 md:gap-3 cursor-pointer">
-          <img src={my_ic_Logo} alt="Logo" className="h-6 md:h-8 w-auto" /> 
+          <img src="/ic_logo.png" alt="Logo" />
           <span className="text-xl md:text-2xl font-bold">LiberInk</span>
         </div>
         <div className="flex items-center gap-4 md:gap-8 text-sm md:text-base font-sans font-normal">
