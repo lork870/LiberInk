@@ -5,6 +5,7 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen w-full flex flex-col bg-[#F6F3E9] font-serif text-[#4A0404] overflow-x-hidden">
       
+      {/* Навігація */}
       <nav className="fixed top-0 left-0 w-full flex justify-between items-center px-6 md:px-12 py-4 border-b border-[#4A0404]/10 z-50 bg-[#F6F3E9]">
         <div className="flex items-center gap-2 md:gap-3 cursor-pointer">
           <img src="/ic_logo.png" alt="Logo" className="h-8 w-auto"/>
@@ -20,12 +21,22 @@ const LandingPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <main className="flex-grow flex flex-col lg:flex-row items-center justify-center px-6 md:px-20 pt-12 md:pt-24 pb-10 gap-8 md:gap-12 w-full">
-        <div className="max-w-xl text-center lg:text-left">
+      <main className="flex-grow flex flex-col items-center justify-center px-6 md:px-20 pt-12 md:pt-24 pb-10 gap-8 md:gap-12 w-full lg:flex-row lg:justify-between lg:items-center">
+        
+        {/* Блок з текстом на мобільному йде зверху */}
+        <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left">
           <h1 className="text-5xl md:text-7xl font-normal leading-[1.1] mb-6 md:mb-8 text-[#4A0404]">
             Your Story,<br /> Your Sanctuary
           </h1>
-          <p className="text-base md:text-lg leading-relaxed text-[#1A1A1A]/70 mb-8 md:mb-10 font-sans font-normal">
+          
+          {/* Зображення на мобільному ставимо сюди (між заголовком і описом) */}
+          <div className="relative w-full max-w-[624px] my-6 lg:hidden">
+            <div className="w-full aspect-[16/10] rounded-[32px] overflow-hidden shadow-xl border border-white/10">
+              <img src={myLanding_img} alt="Writing" className="w-full h-full object-cover" />
+            </div>
+          </div>
+
+          <p className="text-base md:text-lg leading-relaxed text-[#1A1A1A]/70 mb-8 md:mb-10 font-sans font-normal max-w-xl">
             LiberInk is a distraction-free writing environment that helps you focus on what matters—your words. Craft, revise, and perfect your stories with powerful version control.
           </p>
           <Link 
@@ -36,13 +47,10 @@ const LandingPage = () => {
           </Link>
         </div>
 
-        <div className="relative w-full max-w-[624px]">
-          <div className="w-full aspect-[16/10] md:aspect-[3/2] rounded-[32px] md:rounded-[40px] overflow-hidden shadow-xl border border-white/10">
-            <img 
-              src={myLanding_img} 
-              alt="Writing" 
-              className="w-full h-full object-cover max-w-full" 
-            />
+        {/* Зображення на десктопі (показуємо тільки на великих екранах) */}
+        <div className="relative w-full max-w-[624px] hidden lg:block">
+          <div className="w-full aspect-[3/2] rounded-[40px] overflow-hidden shadow-xl border border-white/10">
+            <img src={myLanding_img} alt="Writing" className="w-full h-full object-cover" />
           </div>
           <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-orange-200/10 blur-[100px] rounded-full pointer-events-none"></div>
         </div>
