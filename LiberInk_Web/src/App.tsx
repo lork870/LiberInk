@@ -25,11 +25,17 @@ const PageTransition = ({ children }: { children: React.ReactNode }) => (
 const AnimatedRoutes = () => {
   const location = useLocation();
   
+  // СЕКРЕТ ТУТ: Якщо ми на auth-сторінках, даємо їм спільний ключ
+  const isAuthRoute = location.pathname === '/login' || location.pathname === '/register';
+  const animationKey = isAuthRoute ? 'auth-flow' : location.pathname;
+  
   return (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
+      <Routes location={location} key={animationKey}>
         <Route path="/LandingPage" element={<PageTransition><LandingPage /></PageTransition>} />
         <Route path="/onboarding" element={<PageTransition><OnboardingPage /></PageTransition>} />
+        
+        {/* Auth сторінки залишаються як були */}
         <Route path="/login" element={<PageTransition><AuthPage /></PageTransition>} />
         <Route path="/register" element={<PageTransition><AuthPage /></PageTransition>} />
 

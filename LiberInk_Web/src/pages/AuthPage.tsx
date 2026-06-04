@@ -7,6 +7,7 @@ import {
   updateProfile 
 } from 'firebase/auth';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion'; // ДОДАНО ІМПОРТ
 
 import { GoogleIcon } from '../components/GoogleIcon'; 
 import bgTexture from '../assets/paper_texture.jpg'; 
@@ -111,8 +112,11 @@ const AuthPage = () => {
       </div>
 
       <div className="w-full max-w-[380px] flex flex-col items-center">
-        <div 
-          className={`w-full rounded-[32px] shadow-[0_15px_40px_rgba(74,4,4,0.12)] px-6 sm:px-8 py-8 border border-[#4A0404]/5 overflow-hidden relative transition-all duration-500 ease-in-out ${isLogin ? 'max-h-[500px]' : 'max-h-[850px]'}`}
+        {/* ЗАМІНЕНО DIV НА MOTION.DIV З LAYOUT */}
+        <motion.div 
+          layout
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+          className="w-full rounded-[32px] shadow-[0_15px_40px_rgba(74,4,4,0.12)] px-6 sm:px-8 py-8 border border-[#4A0404]/5 overflow-hidden relative bg-white"
         >
           
           <div 
@@ -126,7 +130,7 @@ const AuthPage = () => {
             <form onSubmit={handleSubmit} className="flex flex-col text-left font-sans">
               
               <div 
-                className={`transition-all duration-500 ease-in-out overflow-hidden ${isLogin ? 'max-h-0 opacity-0 mb-0 pt-0' : 'max-h-[100px] opacity-100 mb-4 pt-3'}`}
+                className={`transition-all duration-400 ease-in-out overflow-hidden ${isLogin ? 'max-h-0 opacity-0 mb-0 pt-0' : 'max-h-[100px] opacity-100 mb-4 pt-3'}`}
               >
                 <div className="relative">
                   <label 
@@ -181,7 +185,7 @@ const AuthPage = () => {
               </div>
 
               <div 
-                className={`transition-all duration-500 ease-in-out overflow-hidden ${isLogin ? 'max-h-0 opacity-0 mb-0 pt-0' : 'max-h-[100px] opacity-100 mb-4 pt-3'}`}
+                className={`transition-all duration-400 ease-in-out overflow-hidden ${isLogin ? 'max-h-0 opacity-0 mb-0 pt-0' : 'max-h-[100px] opacity-100 mb-4 pt-3'}`}
               >
                 <div className="relative">
                   <label className="absolute top-0 left-4 -translate-y-1/2 z-20 px-1.5 text-[12px] font-medium text-[#4A0404]/80 bg-white/70 rounded-sm"
@@ -219,7 +223,7 @@ const AuthPage = () => {
             <button 
               onClick={handleGoogleSignIn}
               type="button"
-              className="w-full py-2.5 px-4 border border-[#4A0404]/20 rounded-full flex items-center justify-center gap-2 hover:bg-white/40 transition-all active:scale-[0.98] shadow-sm"
+              className="w-full py-2.5 px-4 border border-[#4A0404]/20 rounded-full flex items-center justify-center gap-2 hover:bg-[#4A0404]/5 transition-all active:scale-[0.98] shadow-sm"
             >
               <GoogleIcon />
               <span className="font-semibold text-[#4A0404]/80 text-sm font-sans">Sign in with Google</span>
@@ -235,7 +239,7 @@ const AuthPage = () => {
               </Link>
             </p>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
