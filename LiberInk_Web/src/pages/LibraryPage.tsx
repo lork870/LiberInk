@@ -241,59 +241,51 @@ const LibraryPage = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-start md:items-center justify-center p-4 md:p-6">
-          {/* Backdrop (фон, що затемнює) */}
-          <div 
-            className="absolute inset-0 bg-[#433D33]/40 backdrop-blur-sm animate-in fade-in duration-200"
-            onClick={() => setIsModalOpen(false)}
-          ></div>
-
-          {/* Модальна картка */}
-          <div className="bg-white w-full max-w-md rounded-[32px] md:rounded-[40px] shadow-2xl animate-in zoom-in-95 duration-200 relative z-10 my-auto overflow-hidden">
+      <div className="fixed inset-0 bg-[#433D33]/40 backdrop-blur-sm z-50 overflow-y-auto">
+        <div className="min-h-screen flex items-start md:items-center justify-center p-4 pt-10 md:pt-0">
+          <div className="bg-white p-6 md:p-10 rounded-[32px] md:rounded-[40px] w-full max-w-md shadow-2xl animate-in zoom-in duration-200 text-left">
             
-            {/* Контейнер для скролу (на випадок низької висоти екрану) */}
-            <div className="p-6 md:p-10 max-h-[85vh] overflow-y-auto">
-              <h2 className="text-xl md:text-2xl font-serif font-bold text-[#4A0E0E] mb-4 md:mb-6">
-                Create New Book
-              </h2>
+            <h2 className="text-xl md:text-2xl font-serif font-bold text-[#4A0E0E] mb-4 md:mb-6">
+              Create New Book
+            </h2>
+            
+            <div className="space-y-3 md:space-y-4">
+              <input 
+                autoFocus
+                className="w-full bg-[#F9F5EB] border-none p-3 md:p-4 rounded-xl outline-none focus:ring-2 focus:ring-[#4A0404]/20 font-sans text-sm md:text-base" 
+                placeholder="Title of your story" 
+                value={newBook.title}
+                onChange={(e) => setNewBook({...newBook, title: e.target.value})}
+              />
               
-              <div className="space-y-3 md:space-y-4">
-                <input 
-                  autoFocus
-                  className="w-full bg-[#F9F5EB] border-none p-3 md:p-4 rounded-xl outline-none focus:ring-2 focus:ring-[#4A0E0E]/20 font-sans text-sm md:text-base transition-all" 
-                  placeholder="Title of your story" 
-                  value={newBook.title}
-                  onChange={(e) => setNewBook({...newBook, title: e.target.value})}
-                />
+              <textarea 
+                className="w-full bg-[#F9F5EB] border-none p-3 md:p-4 rounded-xl outline-none focus:ring-2 focus:ring-[#4A0404]/20 resize-none font-sans text-sm md:text-base" 
+                placeholder="Description (optional)"
+                rows={3}
+                value={newBook.description}
+                onChange={(e) => setNewBook({...newBook, description: e.target.value})}
+              />
+            </div>
+            
+            <div className="flex gap-3 md:gap-4 mt-6 md:mt-8">
+                <button 
+                  onClick={() => setIsModalOpen(false)} 
+                  className="flex-1 py-3 md:py-4 text-[#A09A90] font-bold hover:text-gray-600 transition-colors text-sm md:text-base"
+                >
+                  Cancel
+                </button>
                 
-                <textarea 
-                  className="w-full bg-[#F9F5EB] border-none p-3 md:p-4 rounded-xl outline-none focus:ring-2 focus:ring-[#4A0404]/20 resize-none font-sans text-sm md:text-base transition-all" 
-                  placeholder="Description (optional)"
-                  rows={3}
-                  value={newBook.description}
-                  onChange={(e) => setNewBook({...newBook, description: e.target.value})}
-                />
-              </div>
-              
-              <div className="flex gap-3 md:gap-4 mt-6 md:mt-8">
-                  <button 
-                    onClick={() => setIsModalOpen(false)} 
-                    className="flex-1 py-3 md:py-4 text-[#A09A90] font-bold hover:text-gray-600 transition-colors text-sm md:text-base active:scale-95 transition-transform"
-                  >
-                    Cancel
-                  </button>
-                  
-                  <button 
-                    onClick={handleCreateBook} 
-                    className="flex-1 py-3 md:py-4 bg-[#4A0E0E] text-white rounded-xl font-bold shadow-lg hover:bg-[#2d0909] text-sm md:text-base active:scale-95 transition-transform"
-                  >
-                    Create
-                  </button>
-              </div>
+                <button 
+                  onClick={handleCreateBook} 
+                  className="flex-1 py-3 md:py-4 bg-[#4A0E0E] text-white rounded-xl font-bold shadow-lg hover:bg-[#2d0909] text-sm md:text-base transition-transform active:scale-95"
+                >
+                  Create
+                </button>
             </div>
           </div>
         </div>
-      )}
+      </div>
+    )}
     </div>
   );
 };
