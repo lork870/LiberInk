@@ -142,7 +142,7 @@ const LandingPage = () => {
         
         <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left flex-grow justify-center relative">
           
-          <h1 className={`text-4xl md:text-7xl font-normal leading-[1.1] mb-6 md:mb-8 text-[#4A0404] ${fadeClass} min-h-[110px] md:min-h-[160px]`}>
+          <h1 className={`text-4xl md:text-7xl font-normal leading-[1.1] mb-0 md:mb-8 text-[#4A0404] ${fadeClass} min-h-[110px] md:min-h-[160px]`}>
             {!isFading && <Typewriter text={SLIDES[currentSlide].title} />}
           </h1>
           
@@ -177,7 +177,7 @@ const LandingPage = () => {
         </div>
 
         {/* Десктопне зображення */}
-        <div className="relative w-full max-w-[624px] hidden lg:block">
+        <div className="relative w-full max-w-[624px] mt-2 mb-6 hidden lg:block">
             <div className={`w-full aspect-[16/10] md:aspect-[3/2] rounded-[32px] md:rounded-[40px] overflow-hidden border border-white/10 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.6)] ${fadeClass}`}>
               <img 
                 src={SLIDES[currentSlide].image} 
