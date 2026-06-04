@@ -142,7 +142,7 @@ const LandingPage = () => {
         
         <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left flex-grow justify-center relative">
           
-          <h1 className={`text-5xl md:text-7xl font-normal leading-[1.1] mb-6 md:mb-8 text-[#4A0404] ${fadeClass} min-h-[110px] md:min-h-[160px]`}>
+          <h1 className={`text-4xl md:text-7xl font-normal leading-[1.1] mb-6 md:mb-8 text-[#4A0404] ${fadeClass} min-h-[110px] md:min-h-[160px]`}>
             {!isFading && <Typewriter text={SLIDES[currentSlide].title} />}
           </h1>
           
