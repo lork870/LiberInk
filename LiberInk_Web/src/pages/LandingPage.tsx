@@ -3,10 +3,10 @@ import myLanding_img from '../assets/landing_img_1.jpg';
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen w-full flex flex-col bg-[#F6F3E9] font-serif text-[#4A0404] overflow-hidden">
+    <div className="min-h-[100dvh] w-full flex flex-col bg-[#F6F3E9] font-serif text-[#4A0404] overflow-hidden">
       
-      {/* Навігація */}
-      <nav className="fixed top-0 left-0 w-full flex justify-between items-center px-6 md:px-12 py-4 border-b border-[#4A0404]/10 z-50 bg-[#F6F3E9]">
+      {/* Навігація - Фіксуємо висоту h-[72px] для точної математики */}
+      <nav className="fixed top-0 left-0 w-full h-[72px] flex justify-between items-center px-6 md:px-12 border-b border-[#4A0404]/10 z-50 bg-[#F6F3E9]">
         <div className="flex items-center gap-2 md:gap-3 cursor-pointer">
           <img src="/ic_logo.png" alt="Logo" className="h-8 w-auto"/>
           <span className="text-xl md:text-2xl font-bold">LiberInk</span>
@@ -21,16 +21,18 @@ const LandingPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <main className="h-[calc(100vh-80px)] mt-20 flex flex-col items-center justify-between px-6 md:px-20 py-6 w-full lg:flex-row lg:justify-between lg:items-center">
+      {/* main починається рівно під навігацією (mt-[72px]) і займає рівно залишок екрана (100dvh - 72px) */}
+      <main className="min-h-[calc(100dvh-72px)] mt-[72px] flex flex-col items-center justify-center px-6 md:px-20 py-8 w-full lg:flex-row lg:justify-between lg:items-center">
         
         {/* Блок з текстом */}
-        <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left flex-grow justify-center">
+        {/* Прибрано flex-grow, щоб контент був зібраний в один блок і чітко центрувався */}
+        <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left">
           <h1 className="text-5xl md:text-7xl font-normal leading-[1.1] mb-6 md:mb-8 text-[#4A0404]">
             Your Story,<br /> Your Sanctuary
           </h1>
           
           {/* Зображення на мобільному */}
-          <div className="relative w-full max-w-[624px] my-6 lg:hidden">
+          <div className="relative w-full max-w-[624px] mb-6 lg:hidden">
             <div className="w-full aspect-[16/10] rounded-[32px] overflow-hidden shadow-[0_10px_30px_-5px_rgba(0,0,0,0.6)] border border-white/10">
               <img src={myLanding_img} alt="Writing" className="w-full h-full object-cover" />
             </div>
