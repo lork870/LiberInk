@@ -132,7 +132,7 @@ const LandingPage = () => {
 
       {/* Hero Section */}
       <main 
-        className="h-[calc(100vh-80px)] mt-20 relative flex flex-col items-center justify-between px-6 md:px-20 py-6 w-full lg:flex-row lg:justify-between lg:items-center"
+        className="flex-grow flex flex-col items-center justify-between px-6 md:px-20 py-6 w-full lg:flex-row lg:justify-between lg:items-center min-h-[calc(100dvh-80px)]"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
