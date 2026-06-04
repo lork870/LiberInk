@@ -41,7 +41,8 @@ const LandingPage = () => {
           </p>
           <Link 
             to="/onboarding" 
-            className="font-[Manrope] bg-[#4A0404] text-[#F6F3E9] px-8 py-3 rounded-full text-lg font-normal hover:bg-[#320a0a] transition-all shadow-md inline-block tracking-wide"
+            
+            className="font-[Manrope] bg-[#4A0404] text-[#F6F3E9] px-8 py-4 lg:py-3 rounded-full text-lg font-normal hover:bg-[#320a0a] transition-all shadow-md block w-full text-center lg:inline-block lg:w-auto tracking-wide"
           >
             Start Your Story Now
           </Link>
