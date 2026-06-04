@@ -21,17 +21,17 @@ const LandingPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <main className="flex-grow flex flex-col items-center justify-center px-6 md:px-20 pt-12 md:pt-24 pb-10 gap-8 md:gap-12 w-full lg:flex-row lg:justify-between lg:items-center">
+      <main className="min-h-screen flex flex-col items-center justify-between px-6 md:px-20 pt-24 pb-8 w-full lg:flex-row lg:justify-between lg:items-center">
         
-        {/* Блок з текстом на мобільному йде зверху */}
-        <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left">
-          <h1 className="text-5xl md:text-7xl font-normal leading-[1.1] mb-6 md:mb-8 text-[#4A0404]">
+        {/* Блок з текстом */}
+        <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left flex-grow justify-center">
+          <h1 className="text-4xl md:text-7xl font-normal leading-[1.1] mb-6 md:mb-8 text-[#4A0404]">
             Your Story,<br /> Your Sanctuary
           </h1>
           
-          {/* Зображення на мобільному ставимо сюди (між заголовком і описом) */}
+          {/* Зображення на мобільному */}
           <div className="relative w-full max-w-[624px] my-6 lg:hidden">
-            <div className="w-full aspect-[16/10] rounded-[32px] overflow-hidden shadow-xl border border-white/10">
+            <div className="w-full aspect-[16/10] rounded-[32px] overflow-hidden shadow-[0_10px_30px_-5px_rgba(0,0,0,0.6)] border border-white/10">
               <img src={myLanding_img} alt="Writing" className="w-full h-full object-cover" />
             </div>
           </div>
@@ -39,27 +39,17 @@ const LandingPage = () => {
           <p className="text-base md:text-lg leading-relaxed text-[#1A1A1A]/70 mb-8 md:mb-10 font-sans font-normal max-w-xl">
             LiberInk is a distraction-free writing environment that helps you focus on what matters—your words. Craft, revise, and perfect your stories with powerful version control.
           </p>
+
+          {/* Кнопка */}
           <Link 
             to="/onboarding" 
-            className="font-[Manrope] 
-                      bg-[#4A0404] 
-                      text-[#F6F3E9] 
-                      px-8 py-4 lg:py-3 
-                      rounded-full 
-                      text-xl lg:text-lg 
-                      font-normal 
-                      block w-full text-center lg:inline-block lg:w-auto 
-                      tracking-wide
-                      shadow-[0_10px_30px_-5px_rgba(74,4,4,0.6)] 
-                      hover:shadow-[0_15px_35px_-5px_rgba(74,4,4,0.5)] 
-                      hover:-translate-y-0.5 
-                      transition-all duration-300"
+            className="font-[Manrope] bg-[#4A0404] text-[#F6F3E9] px-8 py-4 lg:py-3 rounded-full text-xl lg:text-lg font-normal block w-full text-center lg:inline-block lg:w-auto tracking-wide shadow-[0_10px_30px_-5px_rgba(74,4,4,0.6)] hover:shadow-[0_15px_35px_-5px_rgba(74,4,4,0.5)] hover:-translate-y-0.5 transition-all duration-300"
           >
             Start Your Story Now
           </Link>
         </div>
 
-        {/* Зображення на десктопі (показуємо тільки на великих екранах) */}
+        {/* Зображення на десктопі */}
         <div className="relative w-full max-w-[624px] hidden lg:block">
             <div className="w-full aspect-[16/10] md:aspect-[3/2] rounded-[32px] md:rounded-[40px] overflow-hidden border border-white/10 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.6)]">
               <img 
