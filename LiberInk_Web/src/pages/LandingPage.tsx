@@ -119,9 +119,12 @@ const LandingPage = () => {
           <span className="text-xl md:text-2xl font-bold">LiberInk</span>
         </div>
         <div className="flex items-center gap-4 md:gap-8 text-sm md:text-base font-sans font-normal">
-          <Link to="/" className="hover:opacity-70 transition-opacity hidden md:block">Features</Link>
-          <Link to="/login" className="hover:opacity-70 transition-opacity">Login</Link>
-          <Link to="/register" className="border border-[#4A0404]/50 px-4 md:px-5 py-1.5 rounded-full hover:bg-[#4A0404] hover:text-[#F6F3E9] transition-all">
+          <Link to="/" className="hover:opacity-70 transition-opacity hidden md:block active:scale-95">Features</Link>
+          <Link to="/login" className="hover:opacity-70 transition-opacity active:scale-95">Login</Link>
+          <Link 
+            to="/register" 
+            className="border border-[#4A0404]/50 px-4 md:px-5 py-1.5 rounded-full hover:bg-[#4A0404] hover:text-[#F6F3E9] transition-all duration-300 active:scale-95"
+          >
             Sign Up
           </Link>
         </div>
@@ -137,12 +140,9 @@ const LandingPage = () => {
         onMouseLeave={() => setIsPaused(false)}  
       >
         
-        {/* Блок з текстом */}
         <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left flex-grow justify-center relative">
           
-          {/* Заголовок тепер з ефектом Typewriter */}
           <h1 className={`text-5xl md:text-7xl font-normal leading-[1.1] mb-6 md:mb-8 text-[#4A0404] ${fadeClass} min-h-[110px] md:min-h-[160px]`}>
-            {/* Ми передаємо текст у компонент */}
             {!isFading && <Typewriter text={SLIDES[currentSlide].title} />}
           </h1>
           
@@ -168,9 +168,9 @@ const LandingPage = () => {
             ))}
           </div>
 
-          <Link 
+          <Link
             to="/onboarding" 
-            className="font-[Manrope] bg-[#4A0404] text-[#F6F3E9] px-8 py-4 lg:py-3 rounded-full text-xl lg:text-lg font-normal block w-full text-center lg:inline-block lg:w-auto tracking-wide shadow-[0_10px_30px_-5px_rgba(74,4,4,0.6)] hover:shadow-[0_15px_35px_-5px_rgba(74,4,4,0.5)] hover:-translate-y-0.5 transition-all duration-300 z-10"
+            className="font-[Manrope] bg-[#4A0404] text-[#F6F3E9] px-8 py-4 lg:py-3 rounded-full text-xl lg:text-lg font-normal block w-full text-center lg:inline-block lg:w-auto tracking-wide shadow-[0_10px_30px_-5px_rgba(74,4,4,0.6)] hover:shadow-[0_15px_35px_-5px_rgba(74,4,4,0.5)] hover:-translate-y-0.5 active:scale-[0.97] active:shadow-none transition-all duration-300 z-10"
           >
             Start Your Story Now
           </Link>
