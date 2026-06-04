@@ -217,6 +217,8 @@ const ToolbarDropdownGroup = ({ activeIcon, children, isOpen, onClick }: any) =>
 // --- 3. ГОЛОВНИЙ КОМПОНЕНТ РЕДАКТОРА ---
 const EditorPage = () => {
 
+  const [showMobileToolbar, setShowMobileToolbar] = useState(false);
+
   const { isOver: isOverRoot, setNodeRef: setRootDropRef } = useDroppable({ id: 'root-drop-zone' });
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -662,7 +664,7 @@ const EditorPage = () => {
         
         {/* ЛІВА ПАНЕЛЬ (Адаптовано як Overlay для мобільних) */}
         <aside 
-          className="absolute md:relative bg-[#FFFCF5] md:rounded-r-[32px] border-r border-[#E8E2D2]/50 flex flex-col shrink-0 mb-0 shadow-2xl md:shadow-sm overflow-hidden h-full transition-all duration-500 ease-in-out z-[100] md:z-50"
+          className="absolute md:relative bg-[#FFFCF5] md:rounded-r-[32px] border-r border-[#E8E2D2]/50 flex flex-col shrink-0 mb-0 shadow-2xl md:shadow-sm overflow-hidden h-full transition-all duration-500 ease-in-out z-[130] md:z-50"
           style={{ 
             width: isSidebarOpen ? (typeof window !== 'undefined' && window.innerWidth < 768 ? '100%' : '240px') : '0px', 
             opacity: isSidebarOpen ? 1 : 0,
@@ -776,266 +778,277 @@ const EditorPage = () => {
           ref={editorContainerRef} 
           className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center scrollbar-hide bg-[#EAD9C6]/20 relative pt-12 md:pt-4 w-full"
         >
-          {/* TOOLBAR (Адаптовано: горизонтальний скрол на мобільних) */}
-          <div className="sticky top-1 bg-[#FFFCF5] backdrop-blur-md px-2 md:px-4 py-2 md:py-3 rounded-2xl shadow-xl border border-[#E8E2D2]/50 flex flex-wrap justify-center items-center gap-1 md:gap-2 mb-6 md:mb-10 z-[120] transition-all w-[95%] sm:w-auto max-w-full mx-auto">
-        
-            <div className="relative" ref={fontDropdownRef}>
-              <button 
-                onClick={() => {
-                  setShowFontDropdown(!showFontDropdown);
-                  setShowSizeDropdown(false);
-                  setShowFormatDropdown(false);
-                }}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all border border-transparent w-[140px] justify-between ${
-                  showFontDropdown ? 'bg-[#F3EAD3] border-[#E8E2D2]' : 'hover:bg-[#F3EAD3] hover:border-[#E8E2D2]'
-                }`}
-              >
-                <span className="text-[13px] font-bold text-[#4A0E0E] truncate flex-1 text-left">
-                  {editor?.getAttributes('textStyle').fontFamily?.split(',')[0].replace(/"/g, '') || 'Inter'}
-                </span>
-                <KeyboardArrowDown sx={{ fontSize: 18, color: '#4A0E0E' }} className="shrink-0"/>
-              </button>
-
-              {showFontDropdown && (
-                <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-[#E8E2D2] overflow-hidden z-[120] animate-in fade-in zoom-in duration-200">
-                  <div className="p-1.5 flex flex-col gap-1 max-h-[350px] overflow-y-auto scrollbar-hide">
-                    {FONTS.map((font) => (
-                      <button 
-                        key={font.name}
-                        onClick={() => handleFontChange(font.family)}
-                        className={`px-4 py-2 text-left rounded-xl transition-all flex items-center justify-between group ${
-                          editor?.getAttributes('textStyle').fontFamily === font.family ? 'bg-[#E29700]/20' : 'hover:bg-[#F3EAD3]'
-                        }`}
-                      >
-                        <div className="flex flex-col">
-                          <span style={{ fontFamily: font.family }} className="text-[16px] text-[#4A0E0E]">
-                            {font.name}
-                          </span>
-                          <span className="text-[9px] text-gray-400 uppercase font-bold tracking-wider leading-none mt-1">
-                            {font.type}
-                          </span>
-                        </div>
-                        {editor?.getAttributes('textStyle').fontFamily === font.family && (
-                          <CheckCircleOutlined sx={{ fontSize: 16, color: '#E29700' }} />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="w-px h-6 bg-gray-200 mx-1" />
-
-            <div className="relative" ref={dropdownRef}>
-              <div className="flex items-center gap-1 hover:bg-[#F3EAD3]/60 rounded-xl px-2 py-1.5 transition-all border border-transparent hover:border-[#E8E2D2] mr-2">
-                <input 
-                  type="text"
-                  value={fontSizeInput}
-                  onChange={(e) => setFontSizeInput(e.target.value)}
-                  onKeyDown={handleFontSizeKeyDown}
-                  onFocus={() => setShowSizeDropdown(true)}
-                  className="w-8 bg-transparent text-[14px] font-bold text-[#4A0E0E] outline-none text-center"
-                />
-                <KeyboardArrowDown 
-                  className={`text-[#4A0E0E] cursor-pointer transition-transform ${showSizeDropdown ? 'rotate-180' : ''}`} 
-                  sx={{ fontSize: 18 }}
-                  onClick={() => setShowSizeDropdown(!showSizeDropdown)}
-                />
-              </div>
-
-              {showSizeDropdown && (
-              <div className="absolute top-full right-0 mt-2 w-16 bg-white rounded-2xl shadow-2xl border border-[#E8E2D2] overflow-hidden z-[100] animate-in fade-in zoom-in duration-200">
-                <div className="max-h-60 overflow-y-auto p-2 scrollbar-hide flex flex-col gap-1">
-                  {FONT_SIZES.map(size => (
-                    <div 
-                      key={size}
-                      onClick={() => handleFontSizeChange(size)}
-                      className={`px-2 py-2 text-center text-[12px] font-bold cursor-pointer transition-all rounded-xl ${
-                        fontSizeInput === size 
-                          ? 'bg-[#E29700]/20 text-black' 
-                          : 'text-[#4A0E0E] hover:bg-[#E29700]/10'
-                      }`}
-                    >
-                      {size}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            </div>
-
-            <div className="w-px h-6 bg-gray-200 mx-1" />
-
-            {/* Група Вирівнювання */}
-            <ToolbarDropdownGroup 
-              isOpen={activeDropdown === 'align'}
-              onClick={() => setActiveDropdown(activeDropdown === 'align' ? null : 'align')}
-              activeIcon={<FormatAlignLeft />}
-            >
-              <ToolbarButton active={editor.isActive({ textAlign: 'left' })} onClick={() => { editor.chain().focus().setTextAlign('left').run(); setActiveDropdown(null); }} IconComponent={FormatAlignLeft} />
-              <ToolbarButton active={editor.isActive({ textAlign: 'center' })} onClick={() => { editor.chain().focus().setTextAlign('center').run(); setActiveDropdown(null); }} IconComponent={FormatAlignCenter} />
-              <ToolbarButton active={editor.isActive({ textAlign: 'right' })} onClick={() => { editor.chain().focus().setTextAlign('right').run(); setActiveDropdown(null); }} IconComponent={FormatAlignRight} />
-              <ToolbarButton active={editor.isActive({ textAlign: 'justify' })} onClick={() => { editor.chain().focus().setTextAlign('justify').run(); setActiveDropdown(null); }} IconComponent={FormatAlignJustify} />
-            </ToolbarDropdownGroup>
-
-            {/* Група Списки */}
-            <ToolbarDropdownGroup 
-              isOpen={activeDropdown === 'list'}
-              onClick={() => setActiveDropdown(activeDropdown === 'list' ? null : 'list')}
-              activeIcon={<FormatListBulleted />}
-            >
-              <ToolbarButton active={editor.isActive('bulletList')} onClick={() => { editor.chain().focus().toggleBulletList().run(); setActiveDropdown(null); }} IconComponent={FormatListBulleted} />
-              <ToolbarButton active={editor.isActive('orderedList')} onClick={() => { editor.chain().focus().toggleOrderedList().run(); setActiveDropdown(null); }} IconComponent={FormatListNumbered} />
-            </ToolbarDropdownGroup>
-
-            <div className="relative" ref={colorDropdownRef}>
-              <div className="flex items-center rounded-xl border border-transparent hover:border-[#E8E2D2] transition-all">
+          {/* TOOLBAR (Word-style: розгорнутий на десктопі, згортається на мобільному) */}
+          <div className="sticky top-1 bg-[#FFFCF5] backdrop-blur-md px-2 md:px-4 py-2 md:py-3 rounded-2xl shadow-xl border border-[#E8E2D2]/50 flex items-center justify-between md:justify-center mb-6 md:mb-10 z-[120] transition-all w-[95%] sm:w-auto max-w-full mx-auto">
+            
+            {/* --- БАЗОВА ГРУПА (Завжди видима) --- */}
+            <div className="flex items-center gap-1 md:gap-2">
+              {/* Шрифт */}
+              <div className="relative" ref={fontDropdownRef}>
                 <button 
                   onClick={() => {
-                    const currentColor = editor.getAttributes('textStyle').color || ACCENT_COLORS[0].color;
-                    editor.chain().focus().setColor(currentColor).run();
-                  }}
-                  className="p-2 hover:bg-[#F3EAD3] rounded-l-xl transition-all"
-                  title="Застосувати колір"
-                >
-                  <div 
-                    className="w-4 h-4 rounded-full border border-black/10 shadow-sm" 
-                    style={{ backgroundColor: editor.getAttributes('textStyle').color || '#333' }}
-                  />
-                </button>
-                <button 
-                  onClick={() => {
-                    setShowColorDropdown(!showColorDropdown);
-                    setShowFontDropdown(false);
+                    setShowFontDropdown(!showFontDropdown);
                     setShowSizeDropdown(false);
+                    setShowFormatDropdown(false);
                   }}
-                  className="p-2 pl-0 hover:bg-[#F3EAD3] rounded-r-xl transition-all"
+                  className={`flex items-center gap-2 px-2 md:px-3 py-1.5 rounded-xl transition-all border border-transparent w-[110px] md:w-[140px] justify-between ${
+                    showFontDropdown ? 'bg-[#F3EAD3] border-[#E8E2D2]' : 'hover:bg-[#F3EAD3] hover:border-[#E8E2D2]'
+                  }`}
                 >
-                  <KeyboardArrowDown sx={{ fontSize: 16, color: '#4A0E0E' }} className={`transition-transform ${showColorDropdown ? 'rotate-180' : ''}`} />
+                  <span className="text-[12px] md:text-[13px] font-bold text-[#4A0E0E] truncate flex-1 text-left">
+                    {editor?.getAttributes('textStyle').fontFamily?.split(',')[0].replace(/"/g, '') || 'Inter'}
+                  </span>
+                  <KeyboardArrowDown sx={{ fontSize: 18, color: '#4A0E0E' }} className="shrink-0"/>
                 </button>
+
+                {showFontDropdown && (
+                  <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-[#E8E2D2] overflow-hidden z-[120] animate-in fade-in zoom-in duration-200">
+                    <div className="p-1.5 flex flex-col gap-1 max-h-[350px] overflow-y-auto scrollbar-hide">
+                      {FONTS.map((font) => (
+                        <button 
+                          key={font.name}
+                          onClick={() => handleFontChange(font.family)}
+                          className={`px-4 py-2 text-left rounded-xl transition-all flex items-center justify-between group ${
+                            editor?.getAttributes('textStyle').fontFamily === font.family ? 'bg-[#E29700]/20' : 'hover:bg-[#F3EAD3]'
+                          }`}
+                        >
+                          <div className="flex flex-col">
+                            <span style={{ fontFamily: font.family }} className="text-[16px] text-[#4A0E0E]">
+                              {font.name}
+                            </span>
+                            <span className="text-[9px] text-gray-400 uppercase font-bold tracking-wider leading-none mt-1">
+                              {font.type}
+                            </span>
+                          </div>
+                          {editor?.getAttributes('textStyle').fontFamily === font.family && (
+                            <CheckCircleOutlined sx={{ fontSize: 16, color: '#E29700' }} />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {showColorDropdown && (
-                <div className="absolute top-full left-0 mt-2 w-40 bg-white rounded-2xl shadow-2xl border border-[#E8E2D2] p-2 z-[130] animate-in fade-in zoom-in duration-200">
-                  <div className="flex flex-col gap-1">
-                    {ACCENT_COLORS.map((c) => (
-                      <button
-                        key={c.color}
-                        onClick={() => {
-                          editor.chain().focus().setColor(c.color).run();
-                          setShowColorDropdown(false);
-                        }}
-                        className="flex items-center gap-3 px-3 py-2 hover:bg-[#F3EAD3] rounded-xl transition-all group"
-                      >
-                        <div className="w-5 h-5 rounded-full shrink-0 shadow-inner border border-black/5" style={{ backgroundColor: c.color }} />
-                        <span className="text-[12px] font-bold text-[#433D33] group-hover:text-[#4A0E0E]">{c.name}</span>
-                      </button>
-                    ))}
-                    <div className="h-px bg-gray-100 my-1" />
-                    <button
-                      onClick={() => {
-                        editor.chain().focus().unsetColor().run();
-                        setShowColorDropdown(false);
-                      }}
-                      className="w-full py-2 text-[11px] font-bold text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                    >
-                      Reset Color
-                    </button>
-                  </div>
+              <div className="w-px h-6 bg-gray-200 mx-0.5 md:mx-1" />
+
+              {/* Розмір */}
+              <div className="relative" ref={dropdownRef}>
+                <div className="flex items-center gap-0.5 md:gap-1 hover:bg-[#F3EAD3]/60 rounded-xl px-1 md:px-2 py-1.5 transition-all border border-transparent hover:border-[#E8E2D2]">
+                  <input 
+                    type="text"
+                    value={fontSizeInput}
+                    onChange={(e) => setFontSizeInput(e.target.value)}
+                    onKeyDown={handleFontSizeKeyDown}
+                    onFocus={() => setShowSizeDropdown(true)}
+                    className="w-6 md:w-8 bg-transparent text-[13px] md:text-[14px] font-bold text-[#4A0E0E] outline-none text-center"
+                  />
+                  <KeyboardArrowDown 
+                    className={`text-[#4A0E0E] cursor-pointer transition-transform ${showSizeDropdown ? 'rotate-180' : ''}`} 
+                    sx={{ fontSize: 18 }}
+                    onClick={() => setShowSizeDropdown(!showSizeDropdown)}
+                  />
                 </div>
-              )}
-            </div>
 
-            <div className="w-px h-6 bg-gray-200 mx-2" />
-
-            <ToolbarButton active={editor.isActive({ textAlign: 'left' })} onClick={() => editor.chain().focus().setTextAlign('left').run()} IconComponent={FormatAlignLeft} />
-            <ToolbarButton active={editor.isActive({ textAlign: 'center' })} onClick={() => editor.chain().focus().setTextAlign('center').run()} IconComponent={FormatAlignCenter} />
-            <ToolbarButton active={editor.isActive({ textAlign: 'right' })} onClick={() => editor.chain().focus().setTextAlign('right').run()} IconComponent={FormatAlignRight} />
-            <ToolbarButton active={editor.isActive({ textAlign: 'justify' })} onClick={() => editor.chain().focus().setTextAlign('justify').run()} IconComponent={FormatAlignJustify} />
-            
-            <div className="w-px h-6 bg-gray-200 mx-2" />
-
-            <ToolbarButton active={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()} IconComponent={FormatListBulleted} />
-            <ToolbarButton active={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()} IconComponent={FormatListNumbered} />
-            
-            <div className="w-px h-6 bg-gray-200 mx-2" />
-
-            <button 
-              onMouseDown={(e) => { 
-                e.preventDefault(); 
-                (editor.chain().focus() as any).setPageBreak().run(); 
-              }}
-              className="p-2 rounded-lg transition-all text-gray-500 hover:bg-[#F3EAD3] hover:text-[#4A0E0E]"
-              title="Розрив сторінки"
-            >
-              <HorizontalRule sx={{ fontSize: 20 }} />
-            </button>
-
-            <div className="w-px h-6 bg-gray-200 mx-2" />
-            
-            {/* КНОПКА ДОДАВАННЯ НОТАТКИ */}
-            <button 
-              onMouseDown={(e) => { 
-                e.preventDefault(); 
-                handleAddNote(); 
-              }}
-              className="p-2 rounded-lg transition-all text-green-600 hover:bg-green-100"
-              title="Додати нотатку до виділеного тексту"
-            >
-              <PushPin sx={{ fontSize: 20 }} />
-            </button>
-
-            <div className="w-px h-6 bg-gray-200 mx-2" />
-
-            <div className="relative" ref={formatDropdownRef}>
-              <button 
-                onClick={() => {
-                  setShowFormatDropdown(!showFormatDropdown);
-                  setShowSizeDropdown(false);
-                }}
-                className={`flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all border border-transparent ${
-                  showFormatDropdown ? 'bg-[#F3EAD3] border-[#E8E2D2]' : 'hover:bg-[#F3EAD3] hover:border-[#E8E2D2]'
-                }`}
-              >
-                <div className="relative w-6 h-6 flex items-center justify-center">
-                  <WordSizeIcon />
-                  <InsertDriveFile className="ml-1.5 mt-1.5 opacity-90" sx={{ fontSize: 20 }} />
-                </div>
-              </button>
-
-              {showFormatDropdown && (
-                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-[#E8E2D2] overflow-hidden z-[110] animate-in fade-in zoom-in duration-200">
-                  <div className="p-2 flex flex-col gap-1 max-h-[400px] overflow-y-auto scrollbar-hide">
-                    {Object.entries(PAGE_FORMATS).map(([key, format]) => (
+                {showSizeDropdown && (
+                <div className="absolute top-full right-0 mt-2 w-16 bg-white rounded-2xl shadow-2xl border border-[#E8E2D2] overflow-hidden z-[100] animate-in fade-in zoom-in duration-200">
+                  <div className="max-h-60 overflow-y-auto p-2 scrollbar-hide flex flex-col gap-1">
+                    {FONT_SIZES.map(size => (
                       <div 
-                        key={key}
-                        onClick={() => {
-                          setCurrentFormat(key as FormatKey);
-                          setShowFormatDropdown(false);
-                          setShowFontDropdown(false);
-                        }}
-                        className={`flex items-center gap-4 px-2 py-1.5 cursor-pointer transition-all rounded-xl ${
-                          currentFormat === key ? 'bg-[#E29700]/20' : 'hover:bg-[#F3EAD3]'
+                        key={size}
+                        onClick={() => handleFontSizeChange(size)}
+                        className={`px-2 py-2 text-center text-[12px] font-bold cursor-pointer transition-all rounded-xl ${
+                          fontSizeInput === size ? 'bg-[#E29700]/20 text-black' : 'text-[#4A0E0E] hover:bg-[#E29700]/10'
                         }`}
                       >
-                        <div className="w-10 flex justify-center items-center h-12 bg-gray-50 rounded-lg border border-gray-100">
-                          <div 
-                            className="border-[1.5px] border-[#4A0E0E]/40 bg-white shadow-sm"
-                            style={{ width: Math.min(24, (format.width / format.height) * 32) + 'px', height: '32px' }}
-                          />
-                        </div>
-                        <div className="flex flex-col text-left">
-                          <span className="text-[14px] font-bold text-[#4A0E0E]">{format.name}</span>
-                          <span className="text-[11px] text-gray-400 font-medium italic">{format.sub}</span>
-                        </div>
+                        {size}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
+              </div>
             </div>
 
+            {/* КНОПКА МЕНЮ ДЛЯ МОБІЛЬНИХ */}
+            <button 
+              onClick={() => setShowMobileToolbar(!showMobileToolbar)}
+              className="md:hidden p-2 rounded-lg text-[#4A0E0E] hover:bg-[#F3EAD3] transition-colors ml-auto"
+            >
+              <MoreVert />
+            </button>
+
+            {/* --- ДОДАТКОВА ГРУПА (Випадає на мобільному, вбудована на десктопі) --- */}
+            <div className={`
+              ${showMobileToolbar ? 'absolute top-full left-0 right-0 mt-2 bg-white flex-col p-3 shadow-2xl border border-[#E8E2D2] rounded-xl z-[150] gap-3' : 'hidden'}
+              md:static md:flex md:flex-row md:items-center md:gap-1 md:bg-transparent md:p-0 md:mt-0 md:shadow-none md:border-none
+            `}>
+              
+              <div className="hidden md:block w-px h-6 bg-gray-200 mx-1" />
+
+              {/* Базове форматування */}
+              <div className="flex items-center gap-1 bg-gray-50 md:bg-transparent p-1 md:p-0 rounded-lg w-full justify-center md:w-auto">
+                <ToolbarButton active={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()} IconComponent={FormatBold} />
+                <ToolbarButton active={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()} IconComponent={FormatItalic} />
+                <ToolbarButton active={editor.isActive('underline')} onClick={() => editor.chain().focus().toggleUnderline().run()} IconComponent={FormatUnderlined} />
+                
+                {/* Колір перенесено сюди для логічного групування */}
+                <div className="relative ml-1" ref={colorDropdownRef}>
+                  <div className="flex items-center rounded-xl border border-transparent hover:border-[#E8E2D2] transition-all">
+                    <button 
+                      onClick={() => {
+                        const currentColor = editor.getAttributes('textStyle').color || ACCENT_COLORS[0].color;
+                        editor.chain().focus().setColor(currentColor).run();
+                      }}
+                      className="p-2 hover:bg-[#F3EAD3] rounded-l-xl transition-all"
+                      title="Застосувати колір"
+                    >
+                      <div 
+                        className="w-4 h-4 rounded-full border border-black/10 shadow-sm" 
+                        style={{ backgroundColor: editor.getAttributes('textStyle').color || '#333' }}
+                      />
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setShowColorDropdown(!showColorDropdown);
+                        setShowFontDropdown(false);
+                        setShowSizeDropdown(false);
+                      }}
+                      className="p-2 pl-0 hover:bg-[#F3EAD3] rounded-r-xl transition-all"
+                    >
+                      <KeyboardArrowDown sx={{ fontSize: 16, color: '#4A0E0E' }} className={`transition-transform ${showColorDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+
+                  {showColorDropdown && (
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 mt-2 w-40 bg-white rounded-2xl shadow-2xl border border-[#E8E2D2] p-2 z-[160] animate-in fade-in zoom-in duration-200">
+                      <div className="flex flex-col gap-1">
+                        {ACCENT_COLORS.map((c) => (
+                          <button
+                            key={c.color}
+                            onClick={() => {
+                              editor.chain().focus().setColor(c.color).run();
+                              setShowColorDropdown(false);
+                            }}
+                            className="flex items-center gap-3 px-3 py-2 hover:bg-[#F3EAD3] rounded-xl transition-all group"
+                          >
+                            <div className="w-5 h-5 rounded-full shrink-0 shadow-inner border border-black/5" style={{ backgroundColor: c.color }} />
+                            <span className="text-[12px] font-bold text-[#433D33] group-hover:text-[#4A0E0E]">{c.name}</span>
+                          </button>
+                        ))}
+                        <div className="h-px bg-gray-100 my-1" />
+                        <button
+                          onClick={() => {
+                            editor.chain().focus().unsetColor().run();
+                            setShowColorDropdown(false);
+                          }}
+                          className="w-full py-2 text-[11px] font-bold text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                        >
+                          Reset Color
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="hidden md:block w-px h-6 bg-gray-200 mx-1" />
+
+              {/* Вирівнювання */}
+              <div className="flex items-center justify-center gap-1 w-full md:w-auto">
+                <ToolbarButton active={editor.isActive({ textAlign: 'left' })} onClick={() => editor.chain().focus().setTextAlign('left').run()} IconComponent={FormatAlignLeft} />
+                <ToolbarButton active={editor.isActive({ textAlign: 'center' })} onClick={() => editor.chain().focus().setTextAlign('center').run()} IconComponent={FormatAlignCenter} />
+                <ToolbarButton active={editor.isActive({ textAlign: 'right' })} onClick={() => editor.chain().focus().setTextAlign('right').run()} IconComponent={FormatAlignRight} />
+                <ToolbarButton active={editor.isActive({ textAlign: 'justify' })} onClick={() => editor.chain().focus().setTextAlign('justify').run()} IconComponent={FormatAlignJustify} />
+              </div>
+
+              <div className="hidden md:block w-px h-6 bg-gray-200 mx-1" />
+
+              {/* Списки */}
+              <div className="flex items-center justify-center gap-1 w-full md:w-auto">
+                <ToolbarButton active={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()} IconComponent={FormatListBulleted} />
+                <ToolbarButton active={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()} IconComponent={FormatListNumbered} />
+              </div>
+              
+              <div className="hidden md:block w-px h-6 bg-gray-200 mx-1" />
+
+              {/* Додаткові інструменти */}
+              <div className="flex items-center justify-center gap-2 border-t md:border-none pt-2 md:pt-0 w-full md:w-auto">
+                <button 
+                  onMouseDown={(e) => { 
+                    e.preventDefault(); 
+                    (editor.chain().focus() as any).setPageBreak().run(); 
+                  }}
+                  className="p-2 rounded-lg transition-all text-gray-500 hover:bg-[#F3EAD3] hover:text-[#4A0E0E]"
+                  title="Розрив сторінки"
+                >
+                  <HorizontalRule sx={{ fontSize: 20 }} />
+                </button>
+                
+                <button 
+                  onMouseDown={(e) => { 
+                    e.preventDefault(); 
+                    handleAddNote(); 
+                    setShowMobileToolbar(false); // Закриваємо меню після додавання
+                  }}
+                  className="p-2 rounded-lg transition-all text-green-600 hover:bg-green-100"
+                  title="Додати нотатку"
+                >
+                  <PushPin sx={{ fontSize: 20 }} />
+                </button>
+
+                <div className="w-px h-6 bg-gray-200 mx-1" />
+
+                <div className="relative" ref={formatDropdownRef}>
+                  <button 
+                    onClick={() => {
+                      setShowFormatDropdown(!showFormatDropdown);
+                      setShowSizeDropdown(false);
+                      setShowFontDropdown(false);
+                    }}
+                    className={`flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all border border-transparent ${
+                      showFormatDropdown ? 'bg-[#F3EAD3] border-[#E8E2D2]' : 'hover:bg-[#F3EAD3] hover:border-[#E8E2D2]'
+                    }`}
+                  >
+                    <div className="relative w-6 h-6 flex items-center justify-center">
+                      <WordSizeIcon />
+                      <InsertDriveFile className="ml-1.5 mt-1.5 opacity-90" sx={{ fontSize: 20 }} />
+                    </div>
+                  </button>
+
+                  {showFormatDropdown && (
+                    <div className="absolute top-full right-0 md:-right-4 mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-[#E8E2D2] overflow-hidden z-[160] animate-in fade-in zoom-in duration-200">
+                      <div className="p-2 flex flex-col gap-1 max-h-[400px] overflow-y-auto scrollbar-hide">
+                        {Object.entries(PAGE_FORMATS).map(([key, format]) => (
+                          <div 
+                            key={key}
+                            onClick={() => {
+                              setCurrentFormat(key as FormatKey);
+                              setShowFormatDropdown(false);
+                            }}
+                            className={`flex items-center gap-4 px-2 py-1.5 cursor-pointer transition-all rounded-xl ${
+                              currentFormat === key ? 'bg-[#E29700]/20' : 'hover:bg-[#F3EAD3]'
+                            }`}
+                          >
+                            <div className="w-10 flex justify-center items-center h-12 bg-gray-50 rounded-lg border border-gray-100">
+                              <div 
+                                className="border-[1.5px] border-[#4A0E0E]/40 bg-white shadow-sm"
+                                style={{ width: Math.min(24, (format.width / format.height) * 32) + 'px', height: '32px' }}
+                              />
+                            </div>
+                            <div className="flex flex-col text-left">
+                              <span className="text-[14px] font-bold text-[#4A0E0E]">{format.name}</span>
+                              <span className="text-[11px] text-gray-400 font-medium italic">{format.sub}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
           </div>
 
           <div 
@@ -1137,7 +1150,7 @@ const EditorPage = () => {
         {!isRightSidebarOpen && (
           <button 
             onClick={() => setIsRightSidebarOpen(true)}
-            className="absolute lg:hidden right-2 md:right-4 top-2 md:top-6 z-[60] bg-[#FFFCF5] p-2 md:p-2.5 rounded-full shadow-lg border border-[#E8E2D2] text-[#4A0E0E] hover:bg-[#F3EAD3] transition-all"
+            className="absolute lg:hidden right-2 md:right-4 top-2 md:top-6 z-[130] bg-[#FFFCF5] p-2 md:p-2.5 rounded-full shadow-lg border border-[#E8E2D2] text-[#4A0E0E] hover:bg-[#F3EAD3] transition-all"
           >
             <PushPin sx={{ fontSize: 24 }} />
           </button>
@@ -1146,14 +1159,14 @@ const EditorPage = () => {
         {/* Затемнення фону при відкритій панелі на мобільному */}
         {isRightSidebarOpen && (
           <div 
-            className="absolute inset-0 bg-[#433D33]/20 backdrop-blur-sm z-[80] lg:hidden"
+            className="absolute inset-0 bg-[#433D33]/20 backdrop-blur-sm z-[125] lg:hidden"
             onClick={() => setIsRightSidebarOpen(false)}
           />
         )}
 
         {/* ПРАВА ПАНЕЛЬ */}
         <aside 
-          className={`absolute lg:relative right-0 top-0 h-full w-[85%] sm:w-80 bg-[#FFFCF5] lg:border-l border-[#E8E2D2]/50 flex flex-col shrink-0 mb-0 shadow-2xl lg:shadow-sm overflow-hidden z-[90] lg:z-50 lg:rounded-tl-[40px] transition-transform duration-300 ease-in-out ${
+          className={`absolute lg:relative right-0 top-0 h-full w-[85%] sm:w-80 bg-[#FFFCF5] lg:border-l border-[#E8E2D2]/50 flex flex-col shrink-0 mb-0 shadow-2xl lg:shadow-sm overflow-hidden z-[130] lg:z-50 lg:rounded-tl-[40px] transition-transform duration-300 ease-in-out ${
             isRightSidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
           }`}
         >
