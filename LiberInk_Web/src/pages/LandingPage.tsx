@@ -41,7 +41,7 @@ const LandingPage = () => {
           </p>
           <Link 
             to="/onboarding" 
-            className="font-[Manrope] bg-[#4A0404] text-[#F6F3E9] px-8 py-4 lg:py-3 rounded-full text-xl lg:text-lg font-normal hover:bg-[#320a0a] transition-all shadow-md block w-full text-center lg:inline-block lg:w-auto tracking-wide"
+            className="font-[Manrope] bg-[#4A0404] text-[#F6F3E9] px-8 py-4 lg:py-3 rounded-full text-xl lg:text-lg font-normal hover:bg-[#320a0a] transition-all shadow-[0_10px_20px_-5px_rgba(74,4,4,0.3)] block w-full text-center lg:inline-block lg:w-auto tracking-wide"
           >
             Start Your Story Now
           </Link>
@@ -49,9 +49,13 @@ const LandingPage = () => {
 
         {/* Зображення на десктопі (показуємо тільки на великих екранах) */}
         <div className="relative w-full max-w-[624px] hidden lg:block">
-          <div className="w-full aspect-[3/2] rounded-[40px] overflow-hidden shadow-xl border border-white/10">
-            <img src={myLanding_img} alt="Writing" className="w-full h-full object-cover" />
-          </div>
+            <div className="w-full aspect-[16/10] md:aspect-[3/2] rounded-[32px] md:rounded-[40px] overflow-hidden shadow-2xl shadow-black/20 border border-white/10">
+              <img 
+                src={myLanding_img} 
+                alt="Writing" 
+                className="w-full h-full object-cover max-w-full" 
+              />
+            </div>
           <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-orange-200/10 blur-[100px] rounded-full pointer-events-none"></div>
         </div>
       </main>
