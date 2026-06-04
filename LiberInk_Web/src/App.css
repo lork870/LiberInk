@@ -205,3 +205,7 @@ html, body {
   width: 100%;
   position: relative;
 }
+
+.app-shadow {
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6);
+}

@@ -41,7 +41,19 @@ const LandingPage = () => {
           </p>
           <Link 
             to="/onboarding" 
-            className="font-[Manrope] bg-[#4A0404] text-[#F6F3E9] px-8 py-4 lg:py-3 rounded-full text-xl lg:text-lg font-normal hover:bg-[#320a0a] transition-all shadow-[0_10px_20px_-5px_rgba(74,4,4,0.3)] block w-full text-center lg:inline-block lg:w-auto tracking-wide"
+            className="font-[Manrope] 
+                      bg-[#4A0404] 
+                      text-[#F6F3E9] 
+                      px-8 py-4 lg:py-3 
+                      rounded-full 
+                      text-xl lg:text-lg 
+                      font-normal 
+                      block w-full text-center lg:inline-block lg:w-auto 
+                      tracking-wide
+                      shadow-[0_10px_30px_-5px_rgba(74,4,4,0.6)] 
+                      hover:shadow-[0_15px_35px_-5px_rgba(74,4,4,0.5)] 
+                      hover:-translate-y-0.5 
+                      transition-all duration-300"
           >
             Start Your Story Now
           </Link>
@@ -49,7 +61,7 @@ const LandingPage = () => {
 
         {/* Зображення на десктопі (показуємо тільки на великих екранах) */}
         <div className="relative w-full max-w-[624px] hidden lg:block">
-            <div className="w-full aspect-[16/10] md:aspect-[3/2] rounded-[32px] md:rounded-[40px] overflow-hidden shadow-2xl shadow-black/20 border border-white/10">
+            <div className="w-full aspect-[16/10] md:aspect-[3/2] rounded-[32px] md:rounded-[40px] overflow-hidden border border-white/10 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.6)]">
               <img 
                 src={myLanding_img} 
                 alt="Writing" 
