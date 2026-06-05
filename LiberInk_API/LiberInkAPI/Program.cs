@@ -20,6 +20,9 @@ builder.Services.AddCors(options =>
                         .AllowAnyHeader());
 });
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5241";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -28,24 +31,21 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        context.Database.EnsureCreated(); 
+        context.Database.Migrate(); 
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Помилка при створенні бази даних.");
+        logger.LogError(ex, "Помилка при міграції бази даних.");
     }
 }
 
 app.UseCors("AllowAll");
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseAuthorization();
 app.MapControllers();
 
-app.Run("http://0.0.0.0:5241");
+app.Run();
