@@ -1,20 +1,30 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace LiberInkAPI.Models
 {
     public class BookElement
     {
+        [Key]
         public int Id { get; set; }
+        
         public int BookId { get; set; }
         
-        // ParentId дозволяє робити вкладеність (папка в папці, сцена в розділі)
         public int? ParentId { get; set; }
         
+        [Required]
         public string Title { get; set; } = string.Empty;
+        
         public string Content { get; set; } = string.Empty;
         
-        // Тип елемента: наприклад, "Folder", "Chapter", "Document"
-        public string ElementType { get; set; } = "Document";
+        // Використовуємо просту стрінгу: "Part" або "Chapter"
+        [Required]
+        public string ElementType { get; set; } = "Chapter"; // <-- Змінив на ElementType, щоб не ламати БД
         
-        // Для збереження порядку при перетягуванні
         public int OrderIndex { get; set; } 
+        
+        // Навігаційні властивості
+        [ForeignKey("BookId")]
+        public Book? Book { get; set; }
     }
 }

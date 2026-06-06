@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using LiberInkAPI.Data;
+using LiberInkAPI.DTOs;
+using LiberInkAPI.Services;
 using LiberInkAPI.Models;
 
 namespace LiberInkAPI.Controllers
@@ -9,52 +9,52 @@ namespace LiberInkAPI.Controllers
     [ApiController]
     public class BookElementsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IBookElementService _service;
 
-        public BookElementsController(AppDbContext context)
+        public BookElementsController(IBookElementService service)
         {
-            _context = context;
+            _service = service;
         }
 
-        // Отримати всю структуру конкретної книги
         [HttpGet("book/{bookId}")]
-        public async Task<ActionResult<IEnumerable<BookElement>>> GetElementsByBook(int bookId)
+        public async Task<ActionResult<IEnumerable<BookElementDto>>> GetElementsByBook(int bookId)
         {
-            return await _context.BookElements
-                .Where(e => e.BookId == bookId)
-                .OrderBy(e => e.OrderIndex)
-                .ToListAsync();
+            return Ok(await _service.GetBookHierarchyAsync(bookId));
         }
 
-        // Створити новий розділ чи документ
+        [HttpGet("{id}")]
+        public async Task<ActionResult<BookElement>> GetElement(int id)
+        {
+            var element = await _service.GetElementByIdAsync(id);
+            return element == null ? NotFound() : Ok(element);
+        }
+
         [HttpPost]
         public async Task<ActionResult<BookElement>> CreateElement(BookElement element)
         {
-            _context.BookElements.Add(element);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetElementsByBook), new { bookId = element.BookId }, element);
+            await _service.CreateElementAsync(element);
+            return Ok(element);
         }
 
-        // Оновити назву, контент або перемістити (змінити ParentId/OrderIndex)
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateElement(int id, BookElement element)
         {
             if (id != element.Id) return BadRequest();
-
-            _context.Entry(element).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            await _service.UpdateElementAsync(element);
             return NoContent();
         }
 
-        // Видалити елемент
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteElement(int id)
         {
-            var element = await _context.BookElements.FindAsync(id);
-            if (element == null) return NotFound();
+            await _service.DeleteElementAsync(id);
+            return NoContent();
+        }
 
-            _context.BookElements.Remove(element);
-            await _context.SaveChangesAsync();
+        [HttpPatch("{id}/move")]
+        public async Task<IActionResult> MoveElement(int id, [FromBody] MoveRequest request)
+        {
+            await _service.MoveElementAsync(id, request);
             return NoContent();
         }
     }
